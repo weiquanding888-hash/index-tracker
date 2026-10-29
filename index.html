@@ -72,7 +72,7 @@ h1{font-family:var(--f-display);font-weight:700;font-size:clamp(24px,4vw,32px);m
 <div class="wrap">
   <header>
     <h1>科创50 · 恒生科技：推演对照实盘</h1>
-    <p class="sub">起点：2026年10月29日收盘，记为0%（科创50 <span class="num">1228.09</span> 点，恒生科技 <span class="num">3744.14</span> 点）。虚线是推演，实线是每个交易日的实盘收盘。</p>
+    <p class="sub">起点：2026年10月29日收盘，记为0%（科创50 <span class="num">1228.09</span> 点，恒生科技 <span class="num">3744.14</span> 点）。虚线是推演，实线是每个交易日的实盘收盘；阴影是50%概率区间，竖向长虚线左侧为未来三个月。</p>
   </header>
 
   <section class="cards" aria-label="最新对照">
@@ -84,6 +84,8 @@ h1{font-family:var(--f-display);font-weight:700;font-size:clamp(24px,4vw,32px);m
         <div><span>偏离</span><b id="s-d">0.0</b></div>
       </div>
       <div class="meta" id="s-m">收盘 1228.09 点</div>
+      <div class="meta" id="s-sig"></div>
+      <div class="meta" id="s-lv"></div>
     </div>
     <div class="card">
       <h2><span class="sw" style="background:var(--hs)"></span>恒生科技</h2>
@@ -93,6 +95,8 @@ h1{font-family:var(--f-display);font-weight:700;font-size:clamp(24px,4vw,32px);m
         <div><span>偏离</span><b id="h-d">0.0</b></div>
       </div>
       <div class="meta" id="h-m">收盘 3744.14 点</div>
+      <div class="meta" id="h-sig"></div>
+      <div class="meta" id="h-lv"></div>
     </div>
   </section>
 
@@ -103,13 +107,19 @@ h1{font-family:var(--f-display);font-weight:700;font-size:clamp(24px,4vw,32px);m
         <span><i class="ln d" style="border-color:var(--star)"></i>科创50 推演</span>
         <span><i class="ln" style="border-color:var(--hs)"></i>恒生科技 实盘</span>
         <span><i class="ln d" style="border-color:var(--hs)"></i>恒生科技 推演</span>
+        <span><i class="sw" style="background:var(--star-soft);width:14px"></i><i class="sw" style="background:var(--hs-soft);width:14px"></i>50%概率区间</span>
+        <span><i class="ln" style="border-top:1.5px dotted var(--ink-3)"></i>情景切换信号线</span>
       </div>
       <div class="tg" role="group" aria-label="显示选项">
         <button id="v-all" aria-pressed="true">两者</button>
         <button id="v-s" aria-pressed="false">科创50</button>
         <button id="v-h" aria-pressed="false">恒生科技</button>
-        <button id="v-band" aria-pressed="true">情景区间</button>
-        <button id="v-zoom" aria-pressed="false">只看已走部分</button>
+        <button id="v-band" aria-pressed="true">50%概率区间</button>
+        </div>
+      <div class="tg" role="group" aria-label="时间范围">
+        <button id="r-all" aria-pressed="true">两年</button>
+        <button id="r-3m" aria-pressed="false">3个月</button>
+        <button id="r-done" aria-pressed="false">已走部分</button>
       </div>
     </div>
     <div class="cw">
@@ -131,27 +141,32 @@ const S0=1228.09,H0=3744.14,T0=Date.UTC(2026,9,29);
 const DAY=864e5;
 const mDays=[0];for(let i=1;i<=24;i++)mDays.push(Math.round((Date.UTC(2026,9+i,28)-T0)/DAY));
 const pct=(a,b)=>a.map(v=>(v/b-1)*100);
+const anch=(m,n)=>{const ks=Object.keys(m).map(Number).sort((x,y)=>x-y);const o=[];for(let i=0;i<n;i++){let j=0;while(ks[j+1]!==undefined&&ks[j+1]<i)j++;const a=ks[j],b=ks[j+1]??a;o.push(b===a?m[a]:m[a]+(m[b]-m[a])*(i-a)/(b-a))}return o};
+const mk=(pts,base,hw)=>{const b=pct(pts,base),w=anch(hw,pts.length);return{b,o:pts.map((v,i)=>(v*(1+w[i]/100)/base-1)*100),p:pts.map((v,i)=>(v*(1-w[i]/100)/base-1)*100),pts,base}};
 const F={
- s:{b:pct([1250,1390,1120,1090,1170,1230,1290,1340,1400,1440,1470,1500,1530,1560,1600,1640,1660,1620,1580,1600,1650,1700,1740,1780,1820],1250),
-    o:pct([1250,1420,1330,1400,1500,1580,1650,1720,1800,1850,1900,1950,2000,2050,2100,2150,2180,2120,2080,2150,2220,2280,2320,2360,2400],1250),
-    p:pct([1250,1300,1080,980,920,900,950,1000,980,1020,1050,1030,1060,1080,1100,1120,1150,1100,1080,1120,1150,1180,1200,1220,1250],1250),base:S0},
- h:{b:pct([3744,3980,3520,3480,3650,3850,3950,4050,4150,4250,4300,4380,4450,4550,4650,4750,4800,4750,4720,4800,4900,4980,5050,5100,5150],3744),
-    o:pct([3744,4100,3900,4050,4300,4550,4700,4850,5000,5100,5200,5300,5400,5500,5600,5700,5800,5750,5750,5850,5950,6050,6150,6250,6300],3744),
-    p:pct([3744,3800,3350,3150,3050,3000,3100,3200,3150,3250,3300,3280,3350,3400,3450,3500,3550,3500,3500,3550,3600,3650,3700,3750,3800],3744),base:H0}
+ s:mk([S0,1340,1130,1100,1140,1200,1250,1310,1360,1395,1430,1465,1495,1530,1560,1600,1620,1580,1545,1565,1610,1660,1700,1740,1780],S0,{0:0,1:7.1,2:10.6,3:12.7,5:14.6,8:16.9,14:20.5,24:24}),
+ h:mk([H0,3960,3530,3500,3650,3830,3920,4030,4140,4230,4310,4400,4480,4560,4640,4730,4780,4740,4710,4790,4880,4960,5030,5080,5130],H0,{0:0,1:6.1,2:7.9,3:8.9,5:10.7,8:12.6,14:15.9,24:19})
 };
+const SIG=[
+ {k:'s',lv:1460,dir:'up',until:'2026-12-31',t:'科创50 乐观信号',m:'12月前收盘站上1460点：改用乐观情形，二次探底大概率不出现'},
+ {k:'s',lv:1050,dir:'down',t:'科创50 悲观信号',m:'收盘跌破1050点：改用悲观情形，底部或推后到明年二季度'},
+ {k:'h',lv:4250,dir:'up',until:'2026-12-31',t:'恒科 乐观信号',m:'12月前收盘站上4250点：改用乐观情形'},
+ {k:'h',lv:3300,dir:'down',t:'恒科 悲观信号',m:'收盘跌破3300点：改用悲观情形'}];
+const LV={s:'阻力 1329 / 1456 · 支撑 1150 / 1100',h:'阻力 3854 / 4250 · 支撑 3500'};
+const X3=Math.round((Date.UTC(2027,0,29)-T0)/DAY);
 const E=[
  {d:'2026-11-03',t:'美国中期选举',p:'必然发生',m:'海外风险偏好的事件窗口'},
- {d:'2026-11-18',t:'英伟达财报（营收指引1080亿美元±2%）',p:'达标约65%',m:'达标或超预期：科创50 +8%~12%'},
+ {d:'2026-11-18',t:'英伟达财报（营收指引1080亿美元±2%）',p:'达标约65%',m:'超预期：科创50月底1330–1380、恒科3950–4100；仅达标或不及：科创50 1150–1220、恒科3600–3750'},
  {d:'2026-11-20',t:'腾讯、阿里、美团等三季报（11月中下旬）',p:'企稳约50%',m:'决定恒生科技反弹力度：+5%~8%'},
- {d:'2026-12-09',t:'美联储议息会议',p:'加息约72%',m:'二次探底：科创50从反弹高点回落15%~20%，恒科回落10%~12%'},
+ {d:'2026-12-09',t:'美联储议息会议',p:'加息约72%',m:'加息且偏鹰：再跌8%~12%；加息但偏鸽：跌3%~5%后企稳；不加息：涨5%~8%，二次探底或取消'},
  {d:'2026-12-15',t:'中央经济工作会议（通常在12月中旬）',p:'超预期约30%',m:'消费与平台政策对恒科影响更大'},
- {d:'2027-02-05',t:'美国巨头四季报：2027年资本开支指引（预期超1万亿美元）',p:'兑现约70%',m:'筑底确认：科创50约-13%，恒科约-7%'},
+ {d:'2027-02-05',t:'美国巨头四季报：2027年资本开支指引（预期超1万亿美元）',p:'兑现约70%',m:'筑底确认：基准1月底科创50约1100点、恒科约3500点'},
  {d:'2027-03-08',t:'全国两会',p:'政策超预期约30%',m:'恒科约+5%'},
  {d:'2027-04-28',t:'A股年报与一季报',p:'盈利达标约55%',m:'验证科创板估值，决定能否站稳'},
  {d:'2027-06-28',t:'美联储加息周期见顶（假设通胀回落）',p:'约50%',m:'两指数进入慢涨阶段'},
  {d:'2027-12-28',t:'存储芯片新产能开始释放',p:'约60%',m:'半导体涨价逻辑减弱，科创50涨速放缓'},
  {d:'2028-03-28',t:'存储周期见顶担忧、产能过剩风险',p:'约40%',m:'科创50回撤约5%'},
- {d:'2028-10-28',t:'推演期末',p:'基准情形',m:'科创50较起点约+46%，恒科约+38%，均未回到前高'}
+ {d:'2028-10-28',t:'推演期末',p:'基准情形',m:'科创50约1780点（起点+45%），恒科约5130点（起点+37%），均未回到前高'}
 ].map(e=>({...e,x:Math.round((Date.parse(e.d)-T0)/DAY)}));
 const dayToDate=x=>{const d=new Date(T0+x*DAY);return d.getUTCFullYear()+'年'+(d.getUTCMonth()+1)+'月'+d.getUTCDate()+'日'};
 const interp=(arr,x)=>{if(x<=0)return arr[0];for(let i=1;i<mDays.length;i++){if(x<=mDays[i]){const a=mDays[i-1],b=mDays[i];return arr[i-1]+(arr[i]-arr[i-1])*(x-a)/(b-a)}}return arr[arr.length-1]};
@@ -160,13 +175,15 @@ const fmtpp=v=>(v>0?'+':v<0?'−':'')+Math.abs(v).toFixed(1);
 const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 
 let actual=[{x:0,s:S0,h:H0,date:'2026-10-29'}];
-let view='all',band=true,zoom=false,act=-1,ch;
+let view='all',band=true,range='all',act=-1,ch;
 
 function colors(){return{star:css('--star'),hs:css('--hs'),starS:css('--star-soft'),hsS:css('--hs-soft'),grid:css('--grid'),ink3:css('--ink-3'),ink2:css('--ink-2'),rule:css('--rule')}}
 function fs(k,key){return mDays.map((x,i)=>({x,y:F[k][key][i]}))}
 function as(k){return actual.map(r=>({x:r.x,y:(r[k]/F[k].base-1)*100}))}
 
 const evPlugin={id:'ev',afterDatasetsDraw(c){const{ctx,chartArea:a,scales:{x}}=c;const k=colors();ctx.save();E.forEach((e,i)=>{if(e.x<x.min||e.x>x.max)return;const px=x.getPixelForValue(e.x);const on=i===act;ctx.strokeStyle=on?k.ink2:k.rule;ctx.lineWidth=on?1.5:1;ctx.setLineDash([3,4]);ctx.beginPath();ctx.moveTo(px,a.top+16);ctx.lineTo(px,a.bottom);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle=on?k.star:k.rule;ctx.beginPath();ctx.arc(px,a.top+8,8,0,7);ctx.fill();ctx.fillStyle=on?'#fff':k.ink2;ctx.font='500 10px "IBM Plex Mono",monospace';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(i+1,px,a.top+8.5)});
+ const y=c.scales.y;SIG.forEach(g=>{if((g.k==='s'&&view==='h')||(g.k==='h'&&view==='s'))return;const v=(g.lv/F[g.k].base-1)*100;if(v<y.min||v>y.max)return;const py=y.getPixelForValue(v);const col=g.k==='s'?k.star:k.hs;ctx.strokeStyle=col;ctx.globalAlpha=.75;ctx.lineWidth=1.2;ctx.setLineDash([2,4]);ctx.beginPath();const xe=g.until?Math.min(a.right,x.getPixelForValue(Math.round((Date.parse(g.until)-T0)/DAY))):a.right;ctx.moveTo(a.left,py);ctx.lineTo(xe,py);ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=1;ctx.fillStyle=col;ctx.font='500 10.5px "Noto Sans SC",sans-serif';ctx.textAlign='left';ctx.textBaseline=g.dir==='up'?'bottom':'top';ctx.fillText(g.t+' '+g.lv,a.left+4,py+(g.dir==='up'?-2:2))});
+ if(X3>=x.min&&X3<=x.max){const px=x.getPixelForValue(X3);ctx.strokeStyle=k.ink3;ctx.lineWidth=1.4;ctx.setLineDash([7,5]);ctx.beginPath();ctx.moveTo(px,a.top);ctx.lineTo(px,a.bottom);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle=k.ink3;ctx.font='500 11px "Noto Sans SC",sans-serif';ctx.textBaseline='top';ctx.textAlign='right';ctx.fillText('未来三个月',px-6,a.top+22);if(px+70<a.right){ctx.textAlign='left';ctx.fillText('远期推演',px+6,a.top+22)}}
  const last=actual[actual.length-1];if(last.x>=x.min&&last.x<=x.max){const px=x.getPixelForValue(last.x);ctx.fillStyle=k.ink3;ctx.font='400 11px "Noto Sans SC",sans-serif';ctx.textAlign='left';ctx.fillText('今天',Math.min(px+6,a.right-30),a.bottom-8)}ctx.restore()}};
 
 function datasets(){const k=colors();const showS=view!=='h',showH=view!=='s';return[
@@ -179,12 +196,12 @@ function datasets(){const k=colors();const showS=view!=='h',showH=view!=='s';ret
  {id:'sa',data:as('s'),borderColor:k.star,backgroundColor:k.star,borderWidth:2.8,tension:0,pointRadius:c=>c.dataIndex===actual.length-1?4.5:0,pointBorderColor:css('--panel'),pointBorderWidth:2,hidden:!showS},
  {id:'ha',data:as('h'),borderColor:k.hs,backgroundColor:k.hs,borderWidth:2.8,tension:0,pointStyle:'rectRot',pointRadius:c=>c.dataIndex===actual.length-1?5.5:0,pointBorderColor:css('--panel'),pointBorderWidth:2,hidden:!showH}]}
 
-function xRange(){if(!zoom)return{min:-5,max:mDays[24]+5};const last=actual[actual.length-1].x;return{min:-2,max:Math.max(30,last+20)}}
+function xRange(){if(range==='3m')return{min:-2,max:X3+4};if(range==='done'){const last=actual[actual.length-1].x;return{min:-2,max:Math.max(21,last+14)}}return{min:-5,max:mDays[24]+5}}
 function tick(v){const d=new Date(T0+v*DAY);return (d.getUTCFullYear()%100)+'/'+String(d.getUTCMonth()+1).padStart(2,'0')}
 
 function tipHTML(x){x=Math.round(x);const rows=[];const near=actual.reduce((b,r)=>Math.abs(r.x-x)<Math.abs(b.x-x)?r:b,actual[0]);const hasA=Math.abs(near.x-x)<=3;const ax=hasA?near.x:x;
- const line=(k,name)=>{const f=interp(F[k].b,ax),lo=interp(F[k].p,ax),hi=interp(F[k].o,ax);let s='<div class="r"><span>'+name+' 推演</span><span class="num">'+fmt(f)+' · '+Math.round(F[k].base*(1+f/100))+'点</span></div>';if(band)s+='<div class="r"><span>　区间</span><span class="num">'+fmt(lo)+' ~ '+fmt(hi)+'</span></div>';if(hasA){const a=(near[k]/F[k].base-1)*100;s+='<div class="r"><span>'+name+' 实盘</span><span class="num">'+fmt(a)+' · '+near[k].toFixed(2)+'</span></div><div class="r"><span>　偏离</span><span class="num">'+fmtpp(a-f)+' 个百分点</span></div>'}return s};
- let h='<h3>'+dayToDate(ax)+(hasA?'':'（推演）')+'</h3>';if(view!=='h')h+=line('s','科创50');if(view!=='s')h+=line('h','恒生科技');
+ const line=(k,name)=>{const f=interp(F[k].b,ax),lo=interp(F[k].p,ax),hi=interp(F[k].o,ax);let s='<div class="r"><span>'+name+' 推演</span><span class="num">'+fmt(f)+' · '+Math.round(F[k].base*(1+f/100))+'点</span></div>';const lo2=Math.round(F[k].base*(1+lo/100)),hi2=Math.round(F[k].base*(1+hi/100));if(band)s+='<div class="r"><span>　50%区间</span><span class="num">'+lo2+' ~ '+hi2+'点</span></div>';if(hasA){const a=(near[k]/F[k].base-1)*100;s+='<div class="r"><span>'+name+' 实盘</span><span class="num">'+fmt(a)+' · '+near[k].toFixed(2)+'</span></div><div class="r"><span>　偏离</span><span class="num">'+fmtpp(a-f)+' 个百分点</span></div>'}return s};
+ let h='<h3>'+dayToDate(ax)+(hasA?'':'（推演）')+(ax>X3?' · 远期':'')+'</h3>';if(view!=='h')h+=line('s','科创50');if(view!=='s')h+=line('h','恒生科技');
  const ev=E.map((e,i)=>({e,i})).filter(o=>Math.abs(o.e.x-ax)<=10);ev.forEach(o=>{h+='<div class="ev"><b style="color:var(--ink);font-weight:500">事件'+(o.i+1)+'：'+o.e.t+'</b><br>概率：'+o.e.p+'<br>影响：'+o.e.m+'</div>'});return h}
 
 function showTip(x,px,py){const t=document.getElementById('tip');t.innerHTML=tipHTML(x);const w=document.querySelector('.cw').clientWidth;const tw=t.offsetWidth;let l=px+14;if(l+tw>w)l=Math.max(0,px-tw-14);t.style.left=l+'px';t.style.top=Math.max(0,Math.min(py-20,document.querySelector('.cw').clientHeight-t.offsetHeight))+'px';t.style.opacity=1}
@@ -194,7 +211,7 @@ function build(){const k=colors();const r=xRange();
  if(ch)ch.destroy();
  ch=new Chart(document.getElementById('c'),{type:'line',data:{datasets:datasets()},plugins:[evPlugin],
  options:{responsive:true,maintainAspectRatio:false,animation:false,parsing:true,interaction:{mode:'nearest',axis:'x',intersect:false},layout:{padding:{top:4,right:6}},
-  scales:{x:{type:'linear',min:r.min,max:r.max,grid:{display:false},border:{color:k.rule},ticks:{color:k.ink3,font:{size:11,family:'IBM Plex Mono'},callback:tick,maxRotation:0,autoSkipPadding:18,stepSize:zoom?7:61}},
+  scales:{x:{type:'linear',min:r.min,max:r.max,grid:{display:false},border:{color:k.rule},ticks:{color:k.ink3,font:{size:11,family:'IBM Plex Mono'},callback:tick,maxRotation:0,autoSkipPadding:18,stepSize:range==='all'?61:range==='3m'?14:7}},
    y:{grid:{color:k.grid},border:{display:false},ticks:{color:k.ink3,font:{size:11,family:'IBM Plex Mono'},callback:v=>(v>0?'+':'')+v+'%'}}},
   plugins:{legend:{display:false},tooltip:{enabled:false}},
   onHover:(e,_,c)=>{const xs=c.scales.x;if(e.x<c.chartArea.left||e.x>c.chartArea.right){hideTip();return}showTip(xs.getValueForPixel(e.x),e.x,e.y)}}});
@@ -202,20 +219,23 @@ function build(){const k=colors();const r=xRange();
 }
 
 function updateCards(){const last=actual[actual.length-1];[['s','s'],['h','h']].forEach(([k,p])=>{const a=(last[k]/F[k].base-1)*100,f=interp(F[k].b,last.x),d=a-f;const ea=document.getElementById(p+'-a');ea.textContent=fmt(a);ea.style.color=a>0?'var(--up)':a<0?'var(--down)':'var(--ink)';document.getElementById(p+'-f').textContent=fmt(f);const ed=document.getElementById(p+'-d');ed.textContent=fmtpp(d);ed.title='实盘减推演，单位为百分点';document.getElementById(p+'-m').textContent='收盘 '+last[k].toFixed(2)+' 点 · '+dayToDate(last.x)+' · 偏离单位为百分点'});
+ ['s','h'].forEach(k=>{const sg=SIG.filter(g=>g.k===k);const hit=sg.map(g=>{const lim=g.until?Math.round((Date.parse(g.until)-T0)/DAY):1e9;const r=actual.find(r=>r.x>0&&r.x<=lim&&(g.dir==='up'?r[k]>=g.lv:r[k]<=g.lv));return r?{g,r}:null}).filter(Boolean);const el=document.getElementById(k+'-sig');if(hit.length){const h=hit[0];el.innerHTML='<b style="color:'+(h.g.dir==='up'?'var(--up)':'var(--down)')+';font-weight:500">已触发'+(h.g.dir==='up'?'乐观':'悲观')+'信号</b>（'+dayToDate(h.r.x)+'）：'+h.g.m}else{el.textContent='信号：未触发（乐观线 '+sg[0].lv+' · 悲观线 '+sg[1].lv+'），按基准情形'}document.getElementById(k+'-lv').textContent='关键点位：'+LV[k]});
  document.getElementById('upd').textContent=actual.length>1?'实盘已更新到'+dayToDate(last.x)+'，共'+actual.length+'个交易日。每个工作日收盘后自动更新。A股涨为红、跌为绿。':'目前只有起点。每个工作日收盘后会自动补上当天收盘价。A股涨为红、跌为绿。';
  E.forEach((e,i)=>{const r=document.querySelectorAll('.evr')[i];if(r)r.classList.toggle('done',e.x<=last.x)})}
 
 function renderEvents(){const box=document.getElementById('evs');box.innerHTML='';E.forEach((e,i)=>{const r=document.createElement('div');r.className='evr';r.tabIndex=0;r.innerHTML='<span class="n">'+String(i+1).padStart(2,'0')+'</span><span class="d num">'+e.d.slice(2).replace(/-/g,'/')+'</span><span>'+e.t+'</span><span class="p">'+e.p+'</span><span class="m">'+e.m+'</span>';
- const on=()=>{act=i;document.querySelectorAll('.evr').forEach(x=>x.classList.remove('on'));r.classList.add('on');if(zoom&&e.x>ch.scales.x.max){zoom=false;setBtns();build()}ch.draw();const px=ch.scales.x.getPixelForValue(e.x);const yv=view==='h'?interp(F.h.b,e.x):interp(F.s.b,e.x);showTip(e.x,px,ch.scales.y.getPixelForValue(yv))};
+ const on=()=>{act=i;document.querySelectorAll('.evr').forEach(x=>x.classList.remove('on'));r.classList.add('on');if(e.x>ch.scales.x.max||e.x<ch.scales.x.min){range='all';setBtns();build()}ch.draw();const px=ch.scales.x.getPixelForValue(e.x);const yv=view==='h'?interp(F.h.b,e.x):interp(F.s.b,e.x);showTip(e.x,px,ch.scales.y.getPixelForValue(yv))};
  const off=()=>{act=-1;r.classList.remove('on');ch.draw();hideTip()};
  r.onmouseenter=on;r.onfocus=on;r.onmouseleave=off;r.onblur=off;box.appendChild(r)})}
 
-function setBtns(){[['v-all','all'],['v-s','s'],['v-h','h']].forEach(([id,v])=>document.getElementById(id).setAttribute('aria-pressed',view===v));document.getElementById('v-band').setAttribute('aria-pressed',band);document.getElementById('v-zoom').setAttribute('aria-pressed',zoom)}
+function setBtns(){[['v-all','all'],['v-s','s'],['v-h','h']].forEach(([id,v])=>document.getElementById(id).setAttribute('aria-pressed',view===v));document.getElementById('v-band').setAttribute('aria-pressed',band);[['r-all','all'],['r-3m','3m'],['r-done','done']].forEach(([id,v])=>document.getElementById(id).setAttribute('aria-pressed',range===v))}
 document.getElementById('v-all').onclick=()=>{view='all';setBtns();build()};
 document.getElementById('v-s').onclick=()=>{view='s';setBtns();build()};
 document.getElementById('v-h').onclick=()=>{view='h';setBtns();build()};
 document.getElementById('v-band').onclick=()=>{band=!band;setBtns();build()};
-document.getElementById('v-zoom').onclick=()=>{zoom=!zoom;setBtns();build()};
+document.getElementById('r-all').onclick=()=>{range='all';setBtns();build()};
+document.getElementById('r-3m').onclick=()=>{range='3m';setBtns();build()};
+document.getElementById('r-done').onclick=()=>{range='done';setBtns();build()};
 matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',()=>build());
 new MutationObserver(()=>build()).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
 
