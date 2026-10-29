@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>科创恒科推演对照</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700&family=Noto+Sans+SC:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0}
+/* Layout: ledger-style tracker. Summary row of two index cards, full-width chart, event register below. */
+:root{
+  --bg:#f6f7f9;--panel:#ffffff;--ink:#14171c;--ink-2:#4a515c;--ink-3:#868d98;--rule:#e2e5ea;--grid:#e8eaee;
+  --star:#2563c9;--star-soft:rgba(37,99,201,.12);--hs:#d4562a;--hs-soft:rgba(212,86,42,.12);
+  --up:#c23b32;--down:#1f8a52;--chip:#eef1f6;
+  --f-display:"Noto Serif SC","Songti SC",serif;--f-body:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;--f-num:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#111418;--panel:#181c22;--ink:#e9ecf1;--ink-2:#b3bac5;--ink-3:#7d8591;--rule:#2a3039;--grid:#232831;
+  --star:#5b93ec;--star-soft:rgba(91,147,236,.16);--hs:#ec7a4f;--hs-soft:rgba(236,122,79,.16);
+  --up:#ef6b62;--down:#43b97a;--chip:#222833;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111418;--panel:#181c22;--ink:#e9ecf1;--ink-2:#b3bac5;--ink-3:#7d8591;--rule:#2a3039;--grid:#232831;
+  --star:#5b93ec;--star-soft:rgba(91,147,236,.16);--hs:#ec7a4f;--hs-soft:rgba(236,122,79,.16);
+  --up:#ef6b62;--down:#43b97a;--chip:#222833;color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.6}
+.wrap{max-width:1080px;margin:0 auto;padding-block:28px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:20px}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(24px,4vw,32px);margin:0;letter-spacing:.01em;text-wrap:balance}
+.sub{color:var(--ink-2);font-size:14px;margin:4px 0 0}
+.num{font-family:var(--f-num);font-variant-numeric:tabular-nums}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.card{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.card h2{font-size:14px;font-weight:500;margin:0;display:flex;align-items:center;gap:8px;color:var(--ink-2)}
+.sw{width:10px;height:10px;border-radius:2px;display:inline-block}
+.kv{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.kv div{display:flex;flex-direction:column;gap:2px}
+.kv span{font-size:12px;color:var(--ink-3);letter-spacing:.04em}
+.kv b{font-family:var(--f-num);font-weight:500;font-size:20px;font-variant-numeric:tabular-nums}
+.meta{font-size:12px;color:var(--ink-3)}
+.panel{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:14px 16px 10px}
+.bar{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;margin-bottom:8px}
+.legend{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:12px;color:var(--ink-2)}
+.legend span{display:flex;align-items:center;gap:6px}
+.ln{width:18px;height:0;border-top:2.5px solid}
+.ln.d{border-top-style:dashed;border-top-width:2px}
+.tg{display:flex;gap:6px;flex-wrap:wrap}
+.tg button{font:inherit;font-size:12px;padding:4px 10px;border-radius:6px;border:1px solid var(--rule);background:transparent;color:var(--ink-2);cursor:pointer}
+.tg button[aria-pressed="true"]{background:var(--chip);color:var(--ink);border-color:var(--ink-3)}
+.tg button:focus-visible{outline:2px solid var(--star);outline-offset:2px}
+.cw{position:relative;height:420px}
+#tip{position:absolute;pointer-events:none;background:var(--panel);border:1px solid var(--rule);border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.55;color:var(--ink-2);width:min(300px,80%);opacity:0;transition:opacity .12s;z-index:2}
+#tip h3{margin:0 0 4px;font-size:13px;font-weight:500;color:var(--ink)}
+#tip .r{display:flex;justify-content:space-between;gap:8px}
+#tip .ev{margin-top:6px;padding-top:6px;border-top:1px solid var(--rule);color:var(--ink-2)}
+.note{font-size:12px;color:var(--ink-3);margin:6px 0 0}
+.evs{display:flex;flex-direction:column}
+.evr{display:grid;grid-template-columns:24px 104px minmax(0,1fr) 110px;gap:10px;align-items:baseline;padding:9px 6px;border-top:1px solid var(--rule);font-size:13px}
+.evr:hover,.evr.on{background:var(--chip)}
+.evr .n{font-family:var(--f-num);font-size:12px;color:var(--ink-3)}
+.evr .d{color:var(--ink-2)}
+.evr .p{text-align:right;color:var(--ink-2);font-size:12px}
+.evr .m{grid-column:3/5;color:var(--ink-3);font-size:12px}
+.evr.done .n{color:var(--star)}
+@media (max-width:560px){.evr{grid-template-columns:22px minmax(0,1fr)}.evr .d,.evr .p,.evr .m{grid-column:2}.evr .p{text-align:left}.cw{height:340px}}
+@media (prefers-reduced-motion:reduce){#tip{transition:none}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>科创50 · 恒生科技：推演对照实盘</h1>
+    <p class="sub">起点：2026年10月29日收盘，记为0%（科创50 <span class="num">1228.09</span> 点，恒生科技 <span class="num">3744.14</span> 点）。虚线是推演，实线是每个交易日的实盘收盘。</p>
+  </header>
+
+  <section class="cards" aria-label="最新对照">
+    <div class="card">
+      <h2><span class="sw" style="background:var(--star)"></span>科创50</h2>
+      <div class="kv">
+        <div><span>实盘</span><b id="s-a">0.0%</b></div>
+        <div><span>推演</span><b id="s-f">0.0%</b></div>
+        <div><span>偏离</span><b id="s-d">0.0</b></div>
+      </div>
+      <div class="meta" id="s-m">收盘 1228.09 点</div>
+    </div>
+    <div class="card">
+      <h2><span class="sw" style="background:var(--hs)"></span>恒生科技</h2>
+      <div class="kv">
+        <div><span>实盘</span><b id="h-a">0.0%</b></div>
+        <div><span>推演</span><b id="h-f">0.0%</b></div>
+        <div><span>偏离</span><b id="h-d">0.0</b></div>
+      </div>
+      <div class="meta" id="h-m">收盘 3744.14 点</div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="bar">
+      <div class="legend">
+        <span><i class="ln" style="border-color:var(--star)"></i>科创50 实盘</span>
+        <span><i class="ln d" style="border-color:var(--star)"></i>科创50 推演</span>
+        <span><i class="ln" style="border-color:var(--hs)"></i>恒生科技 实盘</span>
+        <span><i class="ln d" style="border-color:var(--hs)"></i>恒生科技 推演</span>
+      </div>
+      <div class="tg" role="group" aria-label="显示选项">
+        <button id="v-all" aria-pressed="true">两者</button>
+        <button id="v-s" aria-pressed="false">科创50</button>
+        <button id="v-h" aria-pressed="false">恒生科技</button>
+        <button id="v-band" aria-pressed="true">情景区间</button>
+        <button id="v-zoom" aria-pressed="false">只看已走部分</button>
+      </div>
+    </div>
+    <div class="cw">
+      <canvas id="c" role="img" aria-label="科创50与恒生科技的推演路径与实盘走势对照，起点为2026年10月29日收盘的0%">推演基准：11月反弹，12月二次探底，2027年1至2月筑底后震荡回升。</canvas>
+      <div id="tip" role="status" aria-live="polite"></div>
+    </div>
+    <p class="note" id="upd">等待实盘数据…</p>
+  </section>
+
+  <section class="panel" aria-label="关键事件">
+    <div class="bar"><h2 style="margin:0;font-size:15px;font-weight:500">关键事件</h2><span class="meta">概率为主观估计；加息概率来自预测市场；不构成投资建议</span></div>
+    <div class="evs" id="evs"></div>
+  </section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const S0=1228.09,H0=3744.14,T0=Date.UTC(2026,9,29);
+const DAY=864e5;
+const mDays=[0];for(let i=1;i<=24;i++)mDays.push(Math.round((Date.UTC(2026,9+i,28)-T0)/DAY));
+const pct=(a,b)=>a.map(v=>(v/b-1)*100);
+const F={
+ s:{b:pct([1250,1390,1120,1090,1170,1230,1290,1340,1400,1440,1470,1500,1530,1560,1600,1640,1660,1620,1580,1600,1650,1700,1740,1780,1820],1250),
+    o:pct([1250,1420,1330,1400,1500,1580,1650,1720,1800,1850,1900,1950,2000,2050,2100,2150,2180,2120,2080,2150,2220,2280,2320,2360,2400],1250),
+    p:pct([1250,1300,1080,980,920,900,950,1000,980,1020,1050,1030,1060,1080,1100,1120,1150,1100,1080,1120,1150,1180,1200,1220,1250],1250),base:S0},
+ h:{b:pct([3744,3980,3520,3480,3650,3850,3950,4050,4150,4250,4300,4380,4450,4550,4650,4750,4800,4750,4720,4800,4900,4980,5050,5100,5150],3744),
+    o:pct([3744,4100,3900,4050,4300,4550,4700,4850,5000,5100,5200,5300,5400,5500,5600,5700,5800,5750,5750,5850,5950,6050,6150,6250,6300],3744),
+    p:pct([3744,3800,3350,3150,3050,3000,3100,3200,3150,3250,3300,3280,3350,3400,3450,3500,3550,3500,3500,3550,3600,3650,3700,3750,3800],3744),base:H0}
+};
+const E=[
+ {d:'2026-11-03',t:'美国中期选举',p:'必然发生',m:'海外风险偏好的事件窗口'},
+ {d:'2026-11-18',t:'英伟达财报（营收指引1080亿美元±2%）',p:'达标约65%',m:'达标或超预期：科创50 +8%~12%'},
+ {d:'2026-11-20',t:'腾讯、阿里、美团等三季报（11月中下旬）',p:'企稳约50%',m:'决定恒生科技反弹力度：+5%~8%'},
+ {d:'2026-12-09',t:'美联储议息会议',p:'加息约72%',m:'二次探底：科创50从反弹高点回落15%~20%，恒科回落10%~12%'},
+ {d:'2026-12-15',t:'中央经济工作会议（通常在12月中旬）',p:'超预期约30%',m:'消费与平台政策对恒科影响更大'},
+ {d:'2027-02-05',t:'美国巨头四季报：2027年资本开支指引（预期超1万亿美元）',p:'兑现约70%',m:'筑底确认：科创50约-13%，恒科约-7%'},
+ {d:'2027-03-08',t:'全国两会',p:'政策超预期约30%',m:'恒科约+5%'},
+ {d:'2027-04-28',t:'A股年报与一季报',p:'盈利达标约55%',m:'验证科创板估值，决定能否站稳'},
+ {d:'2027-06-28',t:'美联储加息周期见顶（假设通胀回落）',p:'约50%',m:'两指数进入慢涨阶段'},
+ {d:'2027-12-28',t:'存储芯片新产能开始释放',p:'约60%',m:'半导体涨价逻辑减弱，科创50涨速放缓'},
+ {d:'2028-03-28',t:'存储周期见顶担忧、产能过剩风险',p:'约40%',m:'科创50回撤约5%'},
+ {d:'2028-10-28',t:'推演期末',p:'基准情形',m:'科创50较起点约+46%，恒科约+38%，均未回到前高'}
+].map(e=>({...e,x:Math.round((Date.parse(e.d)-T0)/DAY)}));
+const dayToDate=x=>{const d=new Date(T0+x*DAY);return d.getUTCFullYear()+'年'+(d.getUTCMonth()+1)+'月'+d.getUTCDate()+'日'};
+const interp=(arr,x)=>{if(x<=0)return arr[0];for(let i=1;i<mDays.length;i++){if(x<=mDays[i]){const a=mDays[i-1],b=mDays[i];return arr[i-1]+(arr[i]-arr[i-1])*(x-a)/(b-a)}}return arr[arr.length-1]};
+const fmt=v=>(v>0?'+':v<0?'−':'')+Math.abs(v).toFixed(1)+'%';
+const fmtpp=v=>(v>0?'+':v<0?'−':'')+Math.abs(v).toFixed(1);
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+let actual=[{x:0,s:S0,h:H0,date:'2026-10-29'}];
+let view='all',band=true,zoom=false,act=-1,ch;
+
+function colors(){return{star:css('--star'),hs:css('--hs'),starS:css('--star-soft'),hsS:css('--hs-soft'),grid:css('--grid'),ink3:css('--ink-3'),ink2:css('--ink-2'),rule:css('--rule')}}
+function fs(k,key){return mDays.map((x,i)=>({x,y:F[k][key][i]}))}
+function as(k){return actual.map(r=>({x:r.x,y:(r[k]/F[k].base-1)*100}))}
+
+const evPlugin={id:'ev',afterDatasetsDraw(c){const{ctx,chartArea:a,scales:{x}}=c;const k=colors();ctx.save();E.forEach((e,i)=>{if(e.x<x.min||e.x>x.max)return;const px=x.getPixelForValue(e.x);const on=i===act;ctx.strokeStyle=on?k.ink2:k.rule;ctx.lineWidth=on?1.5:1;ctx.setLineDash([3,4]);ctx.beginPath();ctx.moveTo(px,a.top+16);ctx.lineTo(px,a.bottom);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle=on?k.star:k.rule;ctx.beginPath();ctx.arc(px,a.top+8,8,0,7);ctx.fill();ctx.fillStyle=on?'#fff':k.ink2;ctx.font='500 10px "IBM Plex Mono",monospace';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(i+1,px,a.top+8.5)});
+ const last=actual[actual.length-1];if(last.x>=x.min&&last.x<=x.max){const px=x.getPixelForValue(last.x);ctx.fillStyle=k.ink3;ctx.font='400 11px "Noto Sans SC",sans-serif';ctx.textAlign='left';ctx.fillText('今天',Math.min(px+6,a.right-30),a.bottom-8)}ctx.restore()}};
+
+function datasets(){const k=colors();const showS=view!=='h',showH=view!=='s';return[
+ {id:'sp',data:fs('s','p'),borderWidth:0,pointRadius:0,fill:false,hidden:!(showS&&band)},
+ {id:'so',data:fs('s','o'),borderWidth:0,pointRadius:0,fill:'-1',backgroundColor:k.starS,hidden:!(showS&&band)},
+ {id:'hp',data:fs('h','p'),borderWidth:0,pointRadius:0,fill:false,hidden:!(showH&&band)},
+ {id:'ho',data:fs('h','o'),borderWidth:0,pointRadius:0,fill:'-1',backgroundColor:k.hsS,hidden:!(showH&&band)},
+ {id:'sf',data:fs('s','b'),borderColor:k.star,borderWidth:2,borderDash:[6,5],tension:.35,pointRadius:0,hidden:!showS},
+ {id:'hf',data:fs('h','b'),borderColor:k.hs,borderWidth:2,borderDash:[6,5],tension:.35,pointRadius:0,hidden:!showH},
+ {id:'sa',data:as('s'),borderColor:k.star,backgroundColor:k.star,borderWidth:2.8,tension:0,pointRadius:c=>c.dataIndex===actual.length-1?4.5:0,pointBorderColor:css('--panel'),pointBorderWidth:2,hidden:!showS},
+ {id:'ha',data:as('h'),borderColor:k.hs,backgroundColor:k.hs,borderWidth:2.8,tension:0,pointStyle:'rectRot',pointRadius:c=>c.dataIndex===actual.length-1?5.5:0,pointBorderColor:css('--panel'),pointBorderWidth:2,hidden:!showH}]}
+
+function xRange(){if(!zoom)return{min:-5,max:mDays[24]+5};const last=actual[actual.length-1].x;return{min:-2,max:Math.max(30,last+20)}}
+function tick(v){const d=new Date(T0+v*DAY);return (d.getUTCFullYear()%100)+'/'+String(d.getUTCMonth()+1).padStart(2,'0')}
+
+function tipHTML(x){x=Math.round(x);const rows=[];const near=actual.reduce((b,r)=>Math.abs(r.x-x)<Math.abs(b.x-x)?r:b,actual[0]);const hasA=Math.abs(near.x-x)<=3;const ax=hasA?near.x:x;
+ const line=(k,name)=>{const f=interp(F[k].b,ax),lo=interp(F[k].p,ax),hi=interp(F[k].o,ax);let s='<div class="r"><span>'+name+' 推演</span><span class="num">'+fmt(f)+' · '+Math.round(F[k].base*(1+f/100))+'点</span></div>';if(band)s+='<div class="r"><span>　区间</span><span class="num">'+fmt(lo)+' ~ '+fmt(hi)+'</span></div>';if(hasA){const a=(near[k]/F[k].base-1)*100;s+='<div class="r"><span>'+name+' 实盘</span><span class="num">'+fmt(a)+' · '+near[k].toFixed(2)+'</span></div><div class="r"><span>　偏离</span><span class="num">'+fmtpp(a-f)+' 个百分点</span></div>'}return s};
+ let h='<h3>'+dayToDate(ax)+(hasA?'':'（推演）')+'</h3>';if(view!=='h')h+=line('s','科创50');if(view!=='s')h+=line('h','恒生科技');
+ const ev=E.map((e,i)=>({e,i})).filter(o=>Math.abs(o.e.x-ax)<=10);ev.forEach(o=>{h+='<div class="ev"><b style="color:var(--ink);font-weight:500">事件'+(o.i+1)+'：'+o.e.t+'</b><br>概率：'+o.e.p+'<br>影响：'+o.e.m+'</div>'});return h}
+
+function showTip(x,px,py){const t=document.getElementById('tip');t.innerHTML=tipHTML(x);const w=document.querySelector('.cw').clientWidth;const tw=t.offsetWidth;let l=px+14;if(l+tw>w)l=Math.max(0,px-tw-14);t.style.left=l+'px';t.style.top=Math.max(0,Math.min(py-20,document.querySelector('.cw').clientHeight-t.offsetHeight))+'px';t.style.opacity=1}
+function hideTip(){document.getElementById('tip').style.opacity=0}
+
+function build(){const k=colors();const r=xRange();
+ if(ch)ch.destroy();
+ ch=new Chart(document.getElementById('c'),{type:'line',data:{datasets:datasets()},plugins:[evPlugin],
+ options:{responsive:true,maintainAspectRatio:false,animation:false,parsing:true,interaction:{mode:'nearest',axis:'x',intersect:false},layout:{padding:{top:4,right:6}},
+  scales:{x:{type:'linear',min:r.min,max:r.max,grid:{display:false},border:{color:k.rule},ticks:{color:k.ink3,font:{size:11,family:'IBM Plex Mono'},callback:tick,maxRotation:0,autoSkipPadding:18,stepSize:zoom?7:61}},
+   y:{grid:{color:k.grid},border:{display:false},ticks:{color:k.ink3,font:{size:11,family:'IBM Plex Mono'},callback:v=>(v>0?'+':'')+v+'%'}}},
+  plugins:{legend:{display:false},tooltip:{enabled:false}},
+  onHover:(e,_,c)=>{const xs=c.scales.x;if(e.x<c.chartArea.left||e.x>c.chartArea.right){hideTip();return}showTip(xs.getValueForPixel(e.x),e.x,e.y)}}});
+ document.getElementById('c').onmouseleave=()=>{if(act<0)hideTip()};
+}
+
+function updateCards(){const last=actual[actual.length-1];[['s','s'],['h','h']].forEach(([k,p])=>{const a=(last[k]/F[k].base-1)*100,f=interp(F[k].b,last.x),d=a-f;const ea=document.getElementById(p+'-a');ea.textContent=fmt(a);ea.style.color=a>0?'var(--up)':a<0?'var(--down)':'var(--ink)';document.getElementById(p+'-f').textContent=fmt(f);const ed=document.getElementById(p+'-d');ed.textContent=fmtpp(d);ed.title='实盘减推演，单位为百分点';document.getElementById(p+'-m').textContent='收盘 '+last[k].toFixed(2)+' 点 · '+dayToDate(last.x)+' · 偏离单位为百分点'});
+ document.getElementById('upd').textContent=actual.length>1?'实盘已更新到'+dayToDate(last.x)+'，共'+actual.length+'个交易日。每个工作日收盘后自动更新。A股涨为红、跌为绿。':'目前只有起点。每个工作日收盘后会自动补上当天收盘价。A股涨为红、跌为绿。';
+ E.forEach((e,i)=>{const r=document.querySelectorAll('.evr')[i];if(r)r.classList.toggle('done',e.x<=last.x)})}
+
+function renderEvents(){const box=document.getElementById('evs');box.innerHTML='';E.forEach((e,i)=>{const r=document.createElement('div');r.className='evr';r.tabIndex=0;r.innerHTML='<span class="n">'+String(i+1).padStart(2,'0')+'</span><span class="d num">'+e.d.slice(2).replace(/-/g,'/')+'</span><span>'+e.t+'</span><span class="p">'+e.p+'</span><span class="m">'+e.m+'</span>';
+ const on=()=>{act=i;document.querySelectorAll('.evr').forEach(x=>x.classList.remove('on'));r.classList.add('on');if(zoom&&e.x>ch.scales.x.max){zoom=false;setBtns();build()}ch.draw();const px=ch.scales.x.getPixelForValue(e.x);const yv=view==='h'?interp(F.h.b,e.x):interp(F.s.b,e.x);showTip(e.x,px,ch.scales.y.getPixelForValue(yv))};
+ const off=()=>{act=-1;r.classList.remove('on');ch.draw();hideTip()};
+ r.onmouseenter=on;r.onfocus=on;r.onmouseleave=off;r.onblur=off;box.appendChild(r)})}
+
+function setBtns(){[['v-all','all'],['v-s','s'],['v-h','h']].forEach(([id,v])=>document.getElementById(id).setAttribute('aria-pressed',view===v));document.getElementById('v-band').setAttribute('aria-pressed',band);document.getElementById('v-zoom').setAttribute('aria-pressed',zoom)}
+document.getElementById('v-all').onclick=()=>{view='all';setBtns();build()};
+document.getElementById('v-s').onclick=()=>{view='s';setBtns();build()};
+document.getElementById('v-h').onclick=()=>{view='h';setBtns();build()};
+document.getElementById('v-band').onclick=()=>{band=!band;setBtns();build()};
+document.getElementById('v-zoom').onclick=()=>{zoom=!zoom;setBtns();build()};
+matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',()=>build());
+new MutationObserver(()=>build()).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+
+renderEvents();build();updateCards();
+
+(async()=>{try{const r=await fetch('data.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();
+ const rows=(j.rows||[]).filter(r=>r&&typeof r.date==='string'&&Number.isFinite(+r.star50)&&Number.isFinite(+r.hstech)).map(r=>({date:r.date,x:Math.round((Date.parse(r.date)-T0)/DAY),s:+r.star50,h:+r.hstech})).filter(r=>r.x>0).sort((a,b)=>a.x-b.x);
+ actual=[{x:0,s:S0,h:H0,date:'2026-10-29'}].concat(rows);build();updateCards()}catch(e){}})();
+</script>
+
+</body>
+</html>
