@@ -3,13 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f6f7f9">
 <title>科创恒科推演对照</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700&family=Noto+Sans+SC:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
 :root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-body{margin:0}
+body{margin:0;-webkit-text-size-adjust:100%}
 /* Layout: ledger-style tracker. Summary row of two index cards, full-width chart, event register below. */
 :root{
   --bg:#f6f7f9;--panel:#ffffff;--ink:#14171c;--ink-2:#4a515c;--ink-3:#868d98;--rule:#e2e5ea;--grid:#e8eaee;
@@ -63,7 +64,32 @@ h1{font-family:var(--f-display);font-weight:700;font-size:clamp(24px,4vw,32px);m
 .evr .p{text-align:right;color:var(--ink-2);font-size:12px}
 .evr .m{grid-column:3/5;color:var(--ink-3);font-size:12px}
 .evr.done .n{color:var(--star)}
-@media (max-width:560px){.evr{grid-template-columns:22px minmax(0,1fr)}.evr .d,.evr .p,.evr .m{grid-column:2}.evr .p{text-align:left}.cw{height:340px}}
+#tipm{display:none}
+#c{touch-action:pan-y}
+@media (max-width:640px){
+ .wrap{padding-block:14px 32px;gap:14px}
+ h1{font-size:21px;line-height:1.35}
+ .sub{font-size:12.5px;line-height:1.55}
+ .cards{grid-template-columns:1fr;gap:10px}
+ .card{padding:12px 14px;gap:6px}
+ .kv b{font-size:18px}
+ .panel{padding:12px 12px 10px}
+ .bar{flex-direction:column;align-items:stretch;gap:8px}
+ .legend{gap:4px 12px;font-size:11px}
+ .tg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px;background:var(--chip);padding:3px;border-radius:8px}
+ .tg button{min-height:36px;border:0;font-size:13px;border-radius:6px;padding:0 4px}
+ .tg button[aria-pressed="true"]{background:var(--panel);border:0;box-shadow:0 0 0 1px var(--rule)}
+ .cw{height:min(62vh,440px);min-height:320px;margin:0 -4px}
+ #tip{display:none}
+ #tipm{display:block;margin-top:8px;padding:10px 12px;border:1px solid var(--rule);border-radius:8px;font-size:12.5px;line-height:1.6;color:var(--ink-2);min-height:72px}
+ #tipm h3{margin:0 0 4px;font-size:13.5px;font-weight:500;color:var(--ink)}
+ #tipm .r{display:flex;justify-content:space-between;gap:8px}
+ #tipm .ev{margin-top:6px;padding-top:6px;border-top:1px solid var(--rule)}
+ .evr{grid-template-columns:24px minmax(0,1fr);gap:2px 8px;padding:10px 4px}
+ .evr .d,.evr .t,.evr .p,.evr .m{grid-column:2}
+ .evr .t{color:var(--ink);font-weight:500}
+ .evr .p{text-align:left}
+}
 @media (prefers-reduced-motion:reduce){#tip{transition:none}}
 </style>
 
@@ -114,7 +140,7 @@ h1{font-family:var(--f-display);font-weight:700;font-size:clamp(24px,4vw,32px);m
         <button id="v-all" aria-pressed="true">两者</button>
         <button id="v-s" aria-pressed="false">科创50</button>
         <button id="v-h" aria-pressed="false">恒生科技</button>
-        <button id="v-band" aria-pressed="true">50%概率区间</button>
+        <button id="v-band" aria-pressed="true">50%区间</button>
         </div>
       <div class="tg" role="group" aria-label="时间范围">
         <button id="r-all" aria-pressed="true">两年</button>
@@ -126,6 +152,7 @@ h1{font-family:var(--f-display);font-weight:700;font-size:clamp(24px,4vw,32px);m
       <canvas id="c" role="img" aria-label="科创50与恒生科技的推演路径与实盘走势对照，起点为2026年10月29日收盘的0%">推演基准：11月反弹，12月二次探底，2027年1至2月筑底后震荡回升。</canvas>
       <div id="tip" role="status" aria-live="polite"></div>
     </div>
+    <div id="tipm" role="status" aria-live="polite">点按或左右拖动图表，查看当天的推演、实盘和事件详情。</div>
     <p class="note" id="upd">等待实盘数据…</p>
   </section>
 
@@ -175,22 +202,23 @@ const fmtpp=v=>(v>0?'+':v<0?'−':'')+Math.abs(v).toFixed(1);
 const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 
 let actual=[{x:0,s:S0,h:H0,date:'2026-10-29'}];
-let view='all',band=true,range='all',act=-1,ch;
+const MQ=matchMedia('(max-width:640px)');let isM=MQ.matches;
+let view='all',band=true,range=isM?'3m':'all',act=-1,ch;
 
 function colors(){return{star:css('--star'),hs:css('--hs'),starS:css('--star-soft'),hsS:css('--hs-soft'),grid:css('--grid'),ink3:css('--ink-3'),ink2:css('--ink-2'),rule:css('--rule')}}
 function fs(k,key){return mDays.map((x,i)=>({x,y:F[k][key][i]}))}
 function as(k){return actual.map(r=>({x:r.x,y:(r[k]/F[k].base-1)*100}))}
 
-const evPlugin={id:'ev',afterDatasetsDraw(c){const{ctx,chartArea:a,scales:{x}}=c;const k=colors();ctx.save();E.forEach((e,i)=>{if(e.x<x.min||e.x>x.max)return;const px=x.getPixelForValue(e.x);const on=i===act;ctx.strokeStyle=on?k.ink2:k.rule;ctx.lineWidth=on?1.5:1;ctx.setLineDash([3,4]);ctx.beginPath();ctx.moveTo(px,a.top+16);ctx.lineTo(px,a.bottom);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle=on?k.star:k.rule;ctx.beginPath();ctx.arc(px,a.top+8,8,0,7);ctx.fill();ctx.fillStyle=on?'#fff':k.ink2;ctx.font='500 10px "IBM Plex Mono",monospace';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(i+1,px,a.top+8.5)});
- const y=c.scales.y;SIG.forEach(g=>{if((g.k==='s'&&view==='h')||(g.k==='h'&&view==='s'))return;const v=(g.lv/F[g.k].base-1)*100;if(v<y.min||v>y.max)return;const py=y.getPixelForValue(v);const col=g.k==='s'?k.star:k.hs;ctx.strokeStyle=col;ctx.globalAlpha=.75;ctx.lineWidth=1.2;ctx.setLineDash([2,4]);ctx.beginPath();const xe=g.until?Math.min(a.right,x.getPixelForValue(Math.round((Date.parse(g.until)-T0)/DAY))):a.right;ctx.moveTo(a.left,py);ctx.lineTo(xe,py);ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=1;ctx.fillStyle=col;ctx.font='500 10.5px "Noto Sans SC",sans-serif';ctx.textAlign='left';ctx.textBaseline=g.dir==='up'?'bottom':'top';ctx.fillText(g.t+' '+g.lv,a.left+4,py+(g.dir==='up'?-2:2))});
- if(X3>=x.min&&X3<=x.max){const px=x.getPixelForValue(X3);ctx.strokeStyle=k.ink3;ctx.lineWidth=1.4;ctx.setLineDash([7,5]);ctx.beginPath();ctx.moveTo(px,a.top);ctx.lineTo(px,a.bottom);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle=k.ink3;ctx.font='500 11px "Noto Sans SC",sans-serif';ctx.textBaseline='top';ctx.textAlign='right';ctx.fillText('未来三个月',px-6,a.top+22);if(px+70<a.right){ctx.textAlign='left';ctx.fillText('远期推演',px+6,a.top+22)}}
+const evPlugin={id:'ev',afterDatasetsDraw(c){const{ctx,chartArea:a,scales:{x}}=c;const k=colors();ctx.save();let lastPx=-99;E.forEach((e,i)=>{if(e.x<x.min||e.x>x.max)return;const px=x.getPixelForValue(e.x);const crowd=px-lastPx<(isM?16:18)&&i!==act;if(!crowd)lastPx=px;const on=i===act;ctx.strokeStyle=on?k.ink2:k.rule;ctx.lineWidth=on?1.5:1;ctx.setLineDash([3,4]);ctx.beginPath();ctx.moveTo(px,a.top+16);ctx.lineTo(px,a.bottom);ctx.stroke();ctx.setLineDash([]);if(crowd){ctx.restore();ctx.save();return}ctx.fillStyle=on?k.star:k.rule;ctx.beginPath();ctx.arc(px,a.top+8,isM?7:8,0,7);ctx.fill();ctx.fillStyle=on?'#fff':k.ink2;ctx.font='500 10px "IBM Plex Mono",monospace';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(i+1,px,a.top+8.5)});
+ const y=c.scales.y;SIG.forEach(g=>{if((g.k==='s'&&view==='h')||(g.k==='h'&&view==='s'))return;const v=(g.lv/F[g.k].base-1)*100;if(v<y.min||v>y.max)return;const py=y.getPixelForValue(v);const col=g.k==='s'?k.star:k.hs;ctx.strokeStyle=col;ctx.globalAlpha=.75;ctx.lineWidth=1.2;ctx.setLineDash([2,4]);ctx.beginPath();const xe=g.until?Math.min(a.right,x.getPixelForValue(Math.round((Date.parse(g.until)-T0)/DAY))):a.right;ctx.moveTo(a.left,py);ctx.lineTo(xe,py);ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=1;ctx.fillStyle=col;ctx.font='500 '+(isM?9.5:10.5)+'px "Noto Sans SC",sans-serif';ctx.textAlign='left';ctx.textBaseline='top';ctx.fillText((isM?g.t.replace(' 信号',''):g.t)+' '+g.lv,a.left+4,py+3)});
+ if(X3>=x.min&&X3<=x.max){const px=x.getPixelForValue(X3);ctx.strokeStyle=k.ink3;ctx.lineWidth=1.4;ctx.setLineDash([7,5]);ctx.beginPath();ctx.moveTo(px,a.top);ctx.lineTo(px,a.bottom);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle=k.ink3;ctx.font='500 '+(isM?10:11)+'px "Noto Sans SC",sans-serif';ctx.textBaseline='top';ctx.textAlign='right';if(px-70>a.left)ctx.fillText('未来三个月',px-6,a.top+22);if(px+70<a.right){ctx.textAlign='left';ctx.fillText('远期推演',px+6,a.top+22)}}
  const last=actual[actual.length-1];if(last.x>=x.min&&last.x<=x.max){const px=x.getPixelForValue(last.x);ctx.fillStyle=k.ink3;ctx.font='400 11px "Noto Sans SC",sans-serif';ctx.textAlign='left';ctx.fillText('今天',Math.min(px+6,a.right-30),a.bottom-8)}ctx.restore()}};
 
 function datasets(){const k=colors();const showS=view!=='h',showH=view!=='s';return[
- {id:'sp',data:fs('s','p'),borderWidth:0,pointRadius:0,fill:false,hidden:!(showS&&band)},
- {id:'so',data:fs('s','o'),borderWidth:0,pointRadius:0,fill:'-1',backgroundColor:k.starS,hidden:!(showS&&band)},
- {id:'hp',data:fs('h','p'),borderWidth:0,pointRadius:0,fill:false,hidden:!(showH&&band)},
- {id:'ho',data:fs('h','o'),borderWidth:0,pointRadius:0,fill:'-1',backgroundColor:k.hsS,hidden:!(showH&&band)},
+ {id:'sp',data:fs('s','p'),borderWidth:0,tension:.35,pointRadius:0,fill:false,hidden:!(showS&&band)},
+ {id:'so',data:fs('s','o'),borderWidth:0,tension:.35,pointRadius:0,fill:'-1',backgroundColor:k.starS,hidden:!(showS&&band)},
+ {id:'hp',data:fs('h','p'),borderWidth:0,tension:.35,pointRadius:0,fill:false,hidden:!(showH&&band)},
+ {id:'ho',data:fs('h','o'),borderWidth:0,tension:.35,pointRadius:0,fill:'-1',backgroundColor:k.hsS,hidden:!(showH&&band)},
  {id:'sf',data:fs('s','b'),borderColor:k.star,borderWidth:2,borderDash:[6,5],tension:.35,pointRadius:0,hidden:!showS},
  {id:'hf',data:fs('h','b'),borderColor:k.hs,borderWidth:2,borderDash:[6,5],tension:.35,pointRadius:0,hidden:!showH},
  {id:'sa',data:as('s'),borderColor:k.star,backgroundColor:k.star,borderWidth:2.8,tension:0,pointRadius:c=>c.dataIndex===actual.length-1?4.5:0,pointBorderColor:css('--panel'),pointBorderWidth:2,hidden:!showS},
@@ -204,18 +232,21 @@ function tipHTML(x){x=Math.round(x);const rows=[];const near=actual.reduce((b,r)
  let h='<h3>'+dayToDate(ax)+(hasA?'':'（推演）')+(ax>X3?' · 远期':'')+'</h3>';if(view!=='h')h+=line('s','科创50');if(view!=='s')h+=line('h','恒生科技');
  const ev=E.map((e,i)=>({e,i})).filter(o=>Math.abs(o.e.x-ax)<=10);ev.forEach(o=>{h+='<div class="ev"><b style="color:var(--ink);font-weight:500">事件'+(o.i+1)+'：'+o.e.t+'</b><br>概率：'+o.e.p+'<br>影响：'+o.e.m+'</div>'});return h}
 
-function showTip(x,px,py){const t=document.getElementById('tip');t.innerHTML=tipHTML(x);const w=document.querySelector('.cw').clientWidth;const tw=t.offsetWidth;let l=px+14;if(l+tw>w)l=Math.max(0,px-tw-14);t.style.left=l+'px';t.style.top=Math.max(0,Math.min(py-20,document.querySelector('.cw').clientHeight-t.offsetHeight))+'px';t.style.opacity=1}
-function hideTip(){document.getElementById('tip').style.opacity=0}
+function showTip(x,px,py){if(isM){document.getElementById('tipm').innerHTML=tipHTML(x);return}const t=document.getElementById('tip');t.innerHTML=tipHTML(x);const w=document.querySelector('.cw').clientWidth;const tw=t.offsetWidth;let l=px+14;if(l+tw>w)l=Math.max(0,px-tw-14);t.style.left=l+'px';t.style.top=Math.max(0,Math.min(py-20,document.querySelector('.cw').clientHeight-t.offsetHeight))+'px';t.style.opacity=1}
+function hideTip(){if(isM)return;document.getElementById('tip').style.opacity=0}
 
 function build(){const k=colors();const r=xRange();
  if(ch)ch.destroy();
  ch=new Chart(document.getElementById('c'),{type:'line',data:{datasets:datasets()},plugins:[evPlugin],
  options:{responsive:true,maintainAspectRatio:false,animation:false,parsing:true,interaction:{mode:'nearest',axis:'x',intersect:false},layout:{padding:{top:4,right:6}},
-  scales:{x:{type:'linear',min:r.min,max:r.max,grid:{display:false},border:{color:k.rule},ticks:{color:k.ink3,font:{size:11,family:'IBM Plex Mono'},callback:tick,maxRotation:0,autoSkipPadding:18,stepSize:range==='all'?61:range==='3m'?14:7}},
+  scales:{x:{type:'linear',min:r.min,max:r.max,afterBuildTicks:ax=>{const step=range==='all'?(isM?4:2):1;const t=[];for(let i=0;i<=26;i+=step){const v=Math.round((Date.UTC(2026,10+i,1)-T0)/DAY);if(v>=ax.min&&v<=ax.max)t.push({value:v})}ax.ticks=t},grid:{display:false},border:{color:k.rule},ticks:{color:k.ink3,font:{size:11,family:'IBM Plex Mono'},callback:tick,maxRotation:0,autoSkipPadding:18,stepSize:range==='all'?(isM?122:61):range==='3m'?(isM?21:14):7}},
    y:{grid:{color:k.grid},border:{display:false},ticks:{color:k.ink3,font:{size:11,family:'IBM Plex Mono'},callback:v=>(v>0?'+':'')+v+'%'}}},
   plugins:{legend:{display:false},tooltip:{enabled:false}},
+  onClick:(e,_,c)=>{const xs=c.scales.x;if(e.x>=c.chartArea.left&&e.x<=c.chartArea.right)showTip(xs.getValueForPixel(e.x),e.x,e.y)},
   onHover:(e,_,c)=>{const xs=c.scales.x;if(e.x<c.chartArea.left||e.x>c.chartArea.right){hideTip();return}showTip(xs.getValueForPixel(e.x),e.x,e.y)}}});
  document.getElementById('c').onmouseleave=()=>{if(act<0)hideTip()};
+ const cv=document.getElementById('c');const tp=ev=>{const pt=ev.touches?ev.touches[0]:ev;const rc=cv.getBoundingClientRect();const px=pt.clientX-rc.left,py=pt.clientY-rc.top;const ca=ch.chartArea;if(px<ca.left||px>ca.right)return;showTip(ch.scales.x.getValueForPixel(px),px,py)};
+ cv.ontouchstart=tp;cv.ontouchmove=tp;cv.onpointerdown=ev=>{if(ev.pointerType!=='mouse')tp(ev)};
 }
 
 function updateCards(){const last=actual[actual.length-1];[['s','s'],['h','h']].forEach(([k,p])=>{const a=(last[k]/F[k].base-1)*100,f=interp(F[k].b,last.x),d=a-f;const ea=document.getElementById(p+'-a');ea.textContent=fmt(a);ea.style.color=a>0?'var(--up)':a<0?'var(--down)':'var(--ink)';document.getElementById(p+'-f').textContent=fmt(f);const ed=document.getElementById(p+'-d');ed.textContent=fmtpp(d);ed.title='实盘减推演，单位为百分点';document.getElementById(p+'-m').textContent='收盘 '+last[k].toFixed(2)+' 点 · '+dayToDate(last.x)+' · 偏离单位为百分点'});
@@ -223,7 +254,7 @@ function updateCards(){const last=actual[actual.length-1];[['s','s'],['h','h']].
  document.getElementById('upd').textContent=actual.length>1?'实盘已更新到'+dayToDate(last.x)+'，共'+actual.length+'个交易日。每个工作日收盘后自动更新。A股涨为红、跌为绿。':'目前只有起点。每个工作日收盘后会自动补上当天收盘价。A股涨为红、跌为绿。';
  E.forEach((e,i)=>{const r=document.querySelectorAll('.evr')[i];if(r)r.classList.toggle('done',e.x<=last.x)})}
 
-function renderEvents(){const box=document.getElementById('evs');box.innerHTML='';E.forEach((e,i)=>{const r=document.createElement('div');r.className='evr';r.tabIndex=0;r.innerHTML='<span class="n">'+String(i+1).padStart(2,'0')+'</span><span class="d num">'+e.d.slice(2).replace(/-/g,'/')+'</span><span>'+e.t+'</span><span class="p">'+e.p+'</span><span class="m">'+e.m+'</span>';
+function renderEvents(){const box=document.getElementById('evs');box.innerHTML='';E.forEach((e,i)=>{const r=document.createElement('div');r.className='evr';r.tabIndex=0;r.innerHTML='<span class="n">'+String(i+1).padStart(2,'0')+'</span><span class="d num">'+e.d.slice(2).replace(/-/g,'/')+'</span><span class="t">'+e.t+'</span><span class="p">'+e.p+'</span><span class="m">'+e.m+'</span>';
  const on=()=>{act=i;document.querySelectorAll('.evr').forEach(x=>x.classList.remove('on'));r.classList.add('on');if(e.x>ch.scales.x.max||e.x<ch.scales.x.min){range='all';setBtns();build()}ch.draw();const px=ch.scales.x.getPixelForValue(e.x);const yv=view==='h'?interp(F.h.b,e.x):interp(F.s.b,e.x);showTip(e.x,px,ch.scales.y.getPixelForValue(yv))};
  const off=()=>{act=-1;r.classList.remove('on');ch.draw();hideTip()};
  r.onmouseenter=on;r.onfocus=on;r.onmouseleave=off;r.onblur=off;box.appendChild(r)})}
@@ -236,6 +267,7 @@ document.getElementById('v-band').onclick=()=>{band=!band;setBtns();build()};
 document.getElementById('r-all').onclick=()=>{range='all';setBtns();build()};
 document.getElementById('r-3m').onclick=()=>{range='3m';setBtns();build()};
 document.getElementById('r-done').onclick=()=>{range='done';setBtns();build()};
+MQ.addEventListener?.('change',e=>{isM=e.matches;build()});
 matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',()=>build());
 new MutationObserver(()=>build()).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
 
