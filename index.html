@@ -7,88 +7,77 @@
 <title>科创恒科推演对照</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700&family=Noto+Sans+SC:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@700&family=Noto+Sans+SC:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
 :root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 body{margin:0;-webkit-text-size-adjust:100%}
-/* Layout: ledger-style tracker. Summary row of two index cards, full-width chart, event register below. */
+/* Layout: two index cards (most-likely vs actual + overbought/oversold state), one path chart, one RSI strip. */
 :root{
-  --bg:#f6f7f9;--panel:#ffffff;--ink:#14171c;--ink-2:#4a515c;--ink-3:#868d98;--rule:#e2e5ea;--grid:#e8eaee;
-  --star:#2563c9;--star-soft:rgba(37,99,201,.12);--hs:#d4562a;--hs-soft:rgba(212,86,42,.12);
-  --up:#c23b32;--down:#1f8a52;--chip:#eef1f6;
+  --bg:#f6f7f9;--panel:#ffffff;--ink:#14171c;--ink-2:#4a515c;--ink-3:#868d98;--rule:#e2e5ea;--grid:#e8eaee;--chip:#eef1f6;
+  --star:#2563c9;--hs:#d4562a;--up:#c23b32;--down:#1f8a52;
+  --os:#0f8a8a;--os-bg:#e2f4f3;--ob:#b7791f;--ob-bg:#fbf0dc;
   --f-display:"Noto Serif SC","Songti SC",serif;--f-body:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;--f-num:"IBM Plex Mono",ui-monospace,Menlo,monospace;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#111418;--panel:#181c22;--ink:#e9ecf1;--ink-2:#b3bac5;--ink-3:#7d8591;--rule:#2a3039;--grid:#232831;
-  --star:#5b93ec;--star-soft:rgba(91,147,236,.16);--hs:#ec7a4f;--hs-soft:rgba(236,122,79,.16);
-  --up:#ef6b62;--down:#43b97a;--chip:#222833;color-scheme:dark}}
+  --bg:#111418;--panel:#181c22;--ink:#e9ecf1;--ink-2:#b3bac5;--ink-3:#7d8591;--rule:#2a3039;--grid:#232831;--chip:#222833;
+  --star:#5b93ec;--hs:#ec7a4f;--up:#ef6b62;--down:#43b97a;--os:#3cc3c0;--os-bg:#123433;--ob:#e3a54a;--ob-bg:#3a2c14;color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#111418;--panel:#181c22;--ink:#e9ecf1;--ink-2:#b3bac5;--ink-3:#7d8591;--rule:#2a3039;--grid:#232831;
-  --star:#5b93ec;--star-soft:rgba(91,147,236,.16);--hs:#ec7a4f;--hs-soft:rgba(236,122,79,.16);
-  --up:#ef6b62;--down:#43b97a;--chip:#222833;color-scheme:dark}
+  --bg:#111418;--panel:#181c22;--ink:#e9ecf1;--ink-2:#b3bac5;--ink-3:#7d8591;--rule:#2a3039;--grid:#232831;--chip:#222833;
+  --star:#5b93ec;--hs:#ec7a4f;--up:#ef6b62;--down:#43b97a;--os:#3cc3c0;--os-bg:#123433;--ob:#e3a54a;--ob-bg:#3a2c14;color-scheme:dark}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.6}
-.wrap{max-width:1080px;margin:0 auto;padding-block:28px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:20px}
-h1{font-family:var(--f-display);font-weight:700;font-size:clamp(24px,4vw,32px);margin:0;letter-spacing:.01em;text-wrap:balance}
+.wrap{max-width:1000px;margin:0 auto;padding-block:28px 44px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:18px}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(22px,4vw,30px);margin:0;text-wrap:balance}
 .sub{color:var(--ink-2);font-size:14px;margin:4px 0 0}
 .num{font-family:var(--f-num);font-variant-numeric:tabular-nums}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
-.card{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:8px;min-width:0}
-.card h2{font-size:14px;font-weight:500;margin:0;display:flex;align-items:center;gap:8px;color:var(--ink-2)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.card{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.ch{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.ch h2{font-size:15px;font-weight:500;margin:0;display:flex;align-items:center;gap:8px}
 .sw{width:10px;height:10px;border-radius:2px;display:inline-block}
+.pill{font-size:12.5px;font-weight:500;padding:3px 10px;border-radius:999px;background:var(--chip);color:var(--ink-2);white-space:nowrap}
+.pill.os{background:var(--os-bg);color:var(--os)}.pill.ob{background:var(--ob-bg);color:var(--ob)}
 .kv{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.kv div{display:flex;flex-direction:column;gap:2px}
-.kv span{font-size:12px;color:var(--ink-3);letter-spacing:.04em}
+.kv div{display:flex;flex-direction:column;gap:1px}
+.kv span{font-size:12px;color:var(--ink-3)}
 .kv b{font-family:var(--f-num);font-weight:500;font-size:20px;font-variant-numeric:tabular-nums}
-.meta{font-size:12px;color:var(--ink-3)}
-.panel{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:14px 16px 10px}
+.meta{font-size:12.5px;color:var(--ink-3);line-height:1.55}
+.meta b{font-weight:500;color:var(--ink-2)}
+.panel{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:14px 16px 12px}
 .bar{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;margin-bottom:8px}
-.legend{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:12px;color:var(--ink-2)}
+.bar h2{margin:0;font-size:15px;font-weight:500}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12px;color:var(--ink-2)}
 .legend span{display:flex;align-items:center;gap:6px}
-.ln{width:18px;height:0;border-top:2.5px solid}
-.ln.d{border-top-style:dashed;border-top-width:2px}
+.ln{width:18px;height:0;border-top:2.5px solid}.ln.d{border-top-style:dashed;border-top-width:2px}
+.tri{width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent}
 .tg{display:flex;gap:6px;flex-wrap:wrap}
-.tg button{font:inherit;font-size:12px;padding:4px 10px;border-radius:6px;border:1px solid var(--rule);background:transparent;color:var(--ink-2);cursor:pointer}
+.tg button{font:inherit;font-size:12.5px;padding:4px 12px;border-radius:6px;border:1px solid var(--rule);background:transparent;color:var(--ink-2);cursor:pointer}
 .tg button[aria-pressed="true"]{background:var(--chip);color:var(--ink);border-color:var(--ink-3)}
 .tg button:focus-visible{outline:2px solid var(--star);outline-offset:2px}
-.cw{position:relative;height:420px}
-#tip{position:absolute;pointer-events:none;background:var(--panel);border:1px solid var(--rule);border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.55;color:var(--ink-2);width:min(300px,80%);opacity:0;transition:opacity .12s;z-index:2}
-#tip h3{margin:0 0 4px;font-size:13px;font-weight:500;color:var(--ink)}
-#tip .r{display:flex;justify-content:space-between;gap:8px}
-#tip .ev{margin-top:6px;padding-top:6px;border-top:1px solid var(--rule);color:var(--ink-2)}
-.note{font-size:12px;color:var(--ink-3);margin:6px 0 0}
-.evs{display:flex;flex-direction:column}
-.evr{display:grid;grid-template-columns:24px 104px minmax(0,1fr) 110px;gap:10px;align-items:baseline;padding:9px 6px;border-top:1px solid var(--rule);font-size:13px}
-.evr:hover,.evr.on{background:var(--chip)}
-.evr .n{font-family:var(--f-num);font-size:12px;color:var(--ink-3)}
-.evr .d{color:var(--ink-2)}
-.evr .p{text-align:right;color:var(--ink-2);font-size:12px}
-.evr .m{grid-column:3/5;color:var(--ink-3);font-size:12px}
-.evr.done .n{color:var(--star)}
+.cw{position:relative;height:400px}.rw{position:relative;height:200px}
+#c,#r{touch-action:pan-y}
+#tip{position:absolute;pointer-events:none;background:var(--panel);border:1px solid var(--rule);border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.55;color:var(--ink-2);width:min(290px,80%);opacity:0;transition:opacity .12s;z-index:2}
+#tip h3,#tipm h3{margin:0 0 4px;font-size:13px;font-weight:500;color:var(--ink)}
+#tip .r,#tipm .r{display:flex;justify-content:space-between;gap:8px}
+#tip .ev,#tipm .ev{margin-top:6px;padding-top:6px;border-top:1px solid var(--rule)}
 #tipm{display:none}
-#c{touch-action:pan-y}
+.note{font-size:12px;color:var(--ink-3);margin:8px 0 0}
+.how{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px 20px;font-size:13px;color:var(--ink-2);margin-top:10px}
+.how b{font-weight:500;color:var(--ink)}
 @media (max-width:640px){
  .wrap{padding-block:14px 32px;gap:14px}
- h1{font-size:21px;line-height:1.35}
- .sub{font-size:12.5px;line-height:1.55}
+ .sub{font-size:12.5px}
  .cards{grid-template-columns:1fr;gap:10px}
- .card{padding:12px 14px;gap:6px}
+ .card{padding:12px 14px;gap:8px}
  .kv b{font-size:18px}
  .panel{padding:12px 12px 10px}
  .bar{flex-direction:column;align-items:stretch;gap:8px}
  .legend{gap:4px 12px;font-size:11px}
  .tg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px;background:var(--chip);padding:3px;border-radius:8px}
  .tg button{min-height:36px;border:0;font-size:13px;border-radius:6px;padding:0 4px}
- .tg button[aria-pressed="true"]{background:var(--panel);border:0;box-shadow:0 0 0 1px var(--rule)}
- .cw{height:min(62vh,440px);min-height:320px;margin:0 -4px}
+ .tg button[aria-pressed="true"]{background:var(--panel);box-shadow:0 0 0 1px var(--rule)}
+ .cw{height:min(58vh,420px);min-height:300px}.rw{height:180px}
  #tip{display:none}
- #tipm{display:block;margin-top:8px;padding:10px 12px;border:1px solid var(--rule);border-radius:8px;font-size:12.5px;line-height:1.6;color:var(--ink-2);min-height:72px}
- #tipm h3{margin:0 0 4px;font-size:13.5px;font-weight:500;color:var(--ink)}
- #tipm .r{display:flex;justify-content:space-between;gap:8px}
- #tipm .ev{margin-top:6px;padding-top:6px;border-top:1px solid var(--rule)}
- .evr{grid-template-columns:24px minmax(0,1fr);gap:2px 8px;padding:10px 4px}
- .evr .d,.evr .t,.evr .p,.evr .m{grid-column:2}
- .evr .t{color:var(--ink);font-weight:500}
- .evr .p{text-align:left}
+ #tipm{display:block;margin-top:8px;padding:10px 12px;border:1px solid var(--rule);border-radius:8px;font-size:12.5px;line-height:1.6;color:var(--ink-2);min-height:64px}
 }
 @media (prefers-reduced-motion:reduce){#tip{transition:none}}
 </style>
@@ -98,31 +87,21 @@ h1{font-family:var(--f-display);font-weight:700;font-size:clamp(24px,4vw,32px);m
 <div class="wrap">
   <header>
     <h1>科创50 · 恒生科技：推演对照实盘</h1>
-    <p class="sub">起点：2026年10月29日收盘，记为0%（科创50 <span class="num">1228.09</span> 点，恒生科技 <span class="num">3744.14</span> 点）。虚线是推演，实线是每个交易日的实盘收盘；阴影是50%概率区间，竖向长虚线左侧为未来三个月。</p>
+    <p class="sub">只看两样：最可能的走势（虚线），和超买超卖信号。起点为2026年10月29日收盘，记为0%（科创50 <span class="num">1228.09</span>，恒生科技 <span class="num">3744.14</span>）。</p>
   </header>
 
-  <section class="cards" aria-label="最新对照">
-    <div class="card">
-      <h2><span class="sw" style="background:var(--star)"></span>科创50</h2>
-      <div class="kv">
-        <div><span>实盘</span><b id="s-a">0.0%</b></div>
-        <div><span>推演</span><b id="s-f">0.0%</b></div>
-        <div><span>偏离</span><b id="s-d">0.0</b></div>
-      </div>
-      <div class="meta" id="s-m">收盘 1228.09 点</div>
-      <div class="meta" id="s-sig"></div>
-      <div class="meta" id="s-lv"></div>
+  <section class="cards" aria-label="最新状态">
+    <div class="card" id="card-s">
+      <div class="ch"><h2><span class="sw" style="background:var(--star)"></span>科创50</h2><span class="pill" id="s-pill">中性</span></div>
+      <div class="kv"><div><span>实盘</span><b id="s-a">0.0%</b></div><div><span>最可能</span><b id="s-f">0.0%</b></div><div><span>偏离</span><b id="s-d">0.0</b></div></div>
+      <div class="meta" id="s-ind"></div>
+      <div class="meta" id="s-m"></div>
     </div>
-    <div class="card">
-      <h2><span class="sw" style="background:var(--hs)"></span>恒生科技</h2>
-      <div class="kv">
-        <div><span>实盘</span><b id="h-a">0.0%</b></div>
-        <div><span>推演</span><b id="h-f">0.0%</b></div>
-        <div><span>偏离</span><b id="h-d">0.0</b></div>
-      </div>
-      <div class="meta" id="h-m">收盘 3744.14 点</div>
-      <div class="meta" id="h-sig"></div>
-      <div class="meta" id="h-lv"></div>
+    <div class="card" id="card-h">
+      <div class="ch"><h2><span class="sw" style="background:var(--hs)"></span>恒生科技</h2><span class="pill" id="h-pill">中性</span></div>
+      <div class="kv"><div><span>实盘</span><b id="h-a">0.0%</b></div><div><span>最可能</span><b id="h-f">0.0%</b></div><div><span>偏离</span><b id="h-d">0.0</b></div></div>
+      <div class="meta" id="h-ind"></div>
+      <div class="meta" id="h-m"></div>
     </div>
   </section>
 
@@ -130,152 +109,144 @@ h1{font-family:var(--f-display);font-weight:700;font-size:clamp(24px,4vw,32px);m
     <div class="bar">
       <div class="legend">
         <span><i class="ln" style="border-color:var(--star)"></i>科创50 实盘</span>
-        <span><i class="ln d" style="border-color:var(--star)"></i>科创50 推演</span>
+        <span><i class="ln d" style="border-color:var(--star)"></i>科创50 最可能</span>
         <span><i class="ln" style="border-color:var(--hs)"></i>恒生科技 实盘</span>
-        <span><i class="ln d" style="border-color:var(--hs)"></i>恒生科技 推演</span>
-        <span><i class="sw" style="background:var(--star-soft);width:14px"></i><i class="sw" style="background:var(--hs-soft);width:14px"></i>50%概率区间</span>
-        <span><i class="ln" style="border-top:1.5px dotted var(--ink-3)"></i>情景切换信号线</span>
+        <span><i class="ln d" style="border-color:var(--hs)"></i>恒生科技 最可能</span>
+        <span><i class="tri" style="border-bottom:9px solid var(--os)"></i>超卖</span>
+        <span><i class="tri" style="border-top:9px solid var(--ob)"></i>超买</span>
       </div>
-      <div class="tg" role="group" aria-label="显示选项">
-        <button id="v-all" aria-pressed="true">两者</button>
-        <button id="v-s" aria-pressed="false">科创50</button>
-        <button id="v-h" aria-pressed="false">恒生科技</button>
-        <button id="v-band" aria-pressed="true">50%区间</button>
-        </div>
-      <div class="tg" role="group" aria-label="时间范围">
-        <button id="r-all" aria-pressed="true">两年</button>
-        <button id="r-3m" aria-pressed="false">3个月</button>
-        <button id="r-done" aria-pressed="false">已走部分</button>
-      </div>
+      <div class="tg" role="group" aria-label="指数"><button id="v-all" aria-pressed="true">两者</button><button id="v-s" aria-pressed="false">科创50</button><button id="v-h" aria-pressed="false">恒生科技</button></div>
+      <div class="tg" role="group" aria-label="时间范围"><button id="r-all" aria-pressed="false">两年</button><button id="r-3m" aria-pressed="true">3个月</button><button id="r-done" aria-pressed="false">已走部分</button></div>
     </div>
     <div class="cw">
-      <canvas id="c" role="img" aria-label="科创50与恒生科技的推演路径与实盘走势对照，起点为2026年10月29日收盘的0%">推演基准：11月反弹，12月二次探底，2027年1至2月筑底后震荡回升。</canvas>
+      <canvas id="c" role="img" aria-label="科创50与恒生科技最可能走势与实盘对照，起点为2026年10月29日收盘的0%">最可能走势：11月反弹，12月二次探底，2027年1月筑底，之后震荡回升。</canvas>
       <div id="tip" role="status" aria-live="polite"></div>
     </div>
-    <div id="tipm" role="status" aria-live="polite">点按或左右拖动图表，查看当天的推演、实盘和事件详情。</div>
-    <p class="note" id="upd">等待实盘数据…</p>
+    <div id="tipm" role="status" aria-live="polite">点按或左右拖动图表，查看当天的最可能点位、实盘和事件。</div>
+    <p class="note" id="upd"></p>
   </section>
 
-  <section class="panel" aria-label="关键事件">
-    <div class="bar"><h2 style="margin:0;font-size:15px;font-weight:500">关键事件</h2><span class="meta">概率为主观估计；加息概率来自预测市场；不构成投资建议</span></div>
-    <div class="evs" id="evs"></div>
+  <section class="panel" aria-label="超买超卖">
+    <div class="bar"><h2>超买超卖：14日RSI</h2><span class="meta">含10月29日之前的历史收盘，用于计算</span></div>
+    <div class="rw"><canvas id="r" role="img" aria-label="科创50与恒生科技的14日RSI，30以下为超卖区，70以上为超买区">RSI走势</canvas></div>
+    <div class="how">
+      <div><b>超卖</b>：RSI低于30，或价格低于20日均线太多（科创50超过10%，恒科超过7%）。两项同时满足记为"强"。意味着短期跌得太急，容易反弹，但不等于见底。</div>
+      <div><b>超买</b>：RSI高于70，或价格高于20日均线太多（科创50超过10%，恒科超过7%）。意味着短期涨得太急，容易回调。</div>
+      <div><b>怎么用</b>：信号和最可能走势同向时更可信，例如推演说"反弹"、同时出现超卖。方向相反时，以实盘为准，小心推演出错。</div>
+    </div>
+    <p class="note">以上为个人推演与常用技术指标，不构成投资建议。</p>
   </section>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
-const S0=1228.09,H0=3744.14,T0=Date.UTC(2026,9,29);
-const DAY=864e5;
+const S0=1228.09,H0=3744.14,T0=Date.UTC(2026,9,29),DAY=864e5;
+const HIST={"star50":[["2026-08-31",1684.39],["2026-09-01",1647.53],["2026-09-02",1617.6],["2026-09-03",1611.17],["2026-09-04",1577.36],["2026-09-07",1615.53],["2026-09-08",1591.0],["2026-09-09",1580.06],["2026-09-10",1569.22],["2026-09-11",1553.39],["2026-09-14",1528.27],["2026-09-15",1551.96],["2026-09-16",1616.19],["2026-09-17",1606.29],["2026-09-18",1652.63],["2026-09-21",1657.48],["2026-09-22",1665.04],["2026-09-23",1660.85],["2026-09-24",1621.87],["2026-09-28",1555.98],["2026-09-29",1569.34],["2026-09-30",1530.07],["2026-10-08",1456.32],["2026-10-09",1457.27],["2026-10-12",1426.72],["2026-10-13",1427.18],["2026-10-14",1380.26],["2026-10-15",1359.47],["2026-10-16",1358.65],["2026-10-19",1329.19],["2026-10-20",1342.42],["2026-10-21",1343.28],["2026-10-22",1305.87],["2026-10-23",1345.5],["2026-10-26",1315.5],["2026-10-27",1252.28],["2026-10-28",1282.93]],"hstech":[["2026-09-28",4296.0],["2026-09-29",4249.62],["2026-09-30",4253.89],["2026-10-02",4157.94],["2026-10-05",4183.68],["2026-10-06",4223.08],["2026-10-07",4194.49],["2026-10-08",4073.38],["2026-10-09",4197.84],["2026-10-12",4169.57],["2026-10-13",4136.63],["2026-10-14",4174.47],["2026-10-15",4060.99],["2026-10-16",4108.24],["2026-10-20",4045.91],["2026-10-21",3994.77],["2026-10-22",3793.93],["2026-10-23",3871.66],["2026-10-26",3823.73],["2026-10-27",3800.43],["2026-10-28",3853.72]]};
+const TH={s:{bias:10},h:{bias:7}};
 const mDays=[0];for(let i=1;i<=24;i++)mDays.push(Math.round((Date.UTC(2026,9+i,28)-T0)/DAY));
 const pct=(a,b)=>a.map(v=>(v/b-1)*100);
-const anch=(m,n)=>{const ks=Object.keys(m).map(Number).sort((x,y)=>x-y);const o=[];for(let i=0;i<n;i++){let j=0;while(ks[j+1]!==undefined&&ks[j+1]<i)j++;const a=ks[j],b=ks[j+1]??a;o.push(b===a?m[a]:m[a]+(m[b]-m[a])*(i-a)/(b-a))}return o};
-const mk=(pts,base,hw)=>{const b=pct(pts,base),w=anch(hw,pts.length);return{b,o:pts.map((v,i)=>(v*(1+w[i]/100)/base-1)*100),p:pts.map((v,i)=>(v*(1-w[i]/100)/base-1)*100),pts,base}};
-const F={
- s:mk([S0,1340,1130,1100,1140,1200,1250,1310,1360,1395,1430,1465,1495,1530,1560,1600,1620,1580,1545,1565,1610,1660,1700,1740,1780],S0,{0:0,1:7.1,2:10.6,3:12.7,5:14.6,8:16.9,14:20.5,24:24}),
- h:mk([H0,3960,3530,3500,3650,3830,3920,4030,4140,4230,4310,4400,4480,4560,4640,4730,4780,4740,4710,4790,4880,4960,5030,5080,5130],H0,{0:0,1:6.1,2:7.9,3:8.9,5:10.7,8:12.6,14:15.9,24:19})
-};
-const SIG=[
- {k:'s',lv:1460,dir:'up',until:'2026-12-31',t:'科创50 乐观信号',m:'12月前收盘站上1460点：改用乐观情形，二次探底大概率不出现'},
- {k:'s',lv:1050,dir:'down',t:'科创50 悲观信号',m:'收盘跌破1050点：改用悲观情形，底部或推后到明年二季度'},
- {k:'h',lv:4250,dir:'up',until:'2026-12-31',t:'恒科 乐观信号',m:'12月前收盘站上4250点：改用乐观情形'},
- {k:'h',lv:3300,dir:'down',t:'恒科 悲观信号',m:'收盘跌破3300点：改用悲观情形'}];
-const LV={s:'阻力 1329 / 1456 · 支撑 1150 / 1100',h:'阻力 3854 / 4250 · 支撑 3500'};
+const F={s:{b:pct([S0,1340,1130,1100,1140,1200,1250,1310,1360,1395,1430,1465,1495,1530,1560,1600,1620,1580,1545,1565,1610,1660,1700,1740,1780],S0),base:S0},
+         h:{b:pct([H0,3960,3530,3500,3650,3830,3920,4030,4140,4230,4310,4400,4480,4560,4640,4730,4780,4740,4710,4790,4880,4960,5030,5080,5130],H0),base:H0}};
 const X3=Math.round((Date.UTC(2027,0,29)-T0)/DAY);
 const E=[
- {d:'2026-11-03',t:'美国中期选举',p:'必然发生',m:'海外风险偏好的事件窗口'},
- {d:'2026-11-18',t:'英伟达财报（营收指引1080亿美元±2%）',p:'达标约65%',m:'超预期：科创50月底1330–1380、恒科3950–4100；仅达标或不及：科创50 1150–1220、恒科3600–3750'},
- {d:'2026-11-20',t:'腾讯、阿里、美团等三季报（11月中下旬）',p:'企稳约50%',m:'决定恒生科技反弹力度：+5%~8%'},
- {d:'2026-12-09',t:'美联储议息会议',p:'加息约72%',m:'加息且偏鹰：再跌8%~12%；加息但偏鸽：跌3%~5%后企稳；不加息：涨5%~8%，二次探底或取消'},
- {d:'2026-12-15',t:'中央经济工作会议（通常在12月中旬）',p:'超预期约30%',m:'消费与平台政策对恒科影响更大'},
- {d:'2027-02-05',t:'美国巨头四季报：2027年资本开支指引（预期超1万亿美元）',p:'兑现约70%',m:'筑底确认：基准1月底科创50约1100点、恒科约3500点'},
- {d:'2027-03-08',t:'全国两会',p:'政策超预期约30%',m:'恒科约+5%'},
- {d:'2027-04-28',t:'A股年报与一季报',p:'盈利达标约55%',m:'验证科创板估值，决定能否站稳'},
- {d:'2027-06-28',t:'美联储加息周期见顶（假设通胀回落）',p:'约50%',m:'两指数进入慢涨阶段'},
- {d:'2027-12-28',t:'存储芯片新产能开始释放',p:'约60%',m:'半导体涨价逻辑减弱，科创50涨速放缓'},
- {d:'2028-03-28',t:'存储周期见顶担忧、产能过剩风险',p:'约40%',m:'科创50回撤约5%'},
- {d:'2028-10-28',t:'推演期末',p:'基准情形',m:'科创50约1780点（起点+45%），恒科约5130点（起点+37%），均未回到前高'}
-].map(e=>({...e,x:Math.round((Date.parse(e.d)-T0)/DAY)}));
+ {d:'2026-11-18',t:'英伟达财报',m:'超预期：科创50月底1330–1380；仅达标：1150–1220'},
+ {d:'2026-11-20',t:'腾讯、阿里、美团三季报',m:'决定恒科反弹力度'},
+ {d:'2026-12-09',t:'美联储议息',m:'市场预期加息（约72%），最可能二次探底'},
+ {d:'2026-12-15',t:'中央经济工作会议',m:'消费、平台政策影响恒科'},
+ {d:'2027-02-05',t:'美国巨头2027年资本开支指引',m:'兑现则确认底部'},
+ {d:'2027-03-08',t:'全国两会',m:'政策预期'},
+ {d:'2027-04-28',t:'A股年报与一季报',m:'验证科创板估值'},
+ {d:'2028-03-28',t:'存储周期见顶担忧',m:'科创50或回撤约5%'}].map(e=>({...e,x:Math.round((Date.parse(e.d)-T0)/DAY)}));
+const dx=d=>Math.round((Date.parse(d)-T0)/DAY);
 const dayToDate=x=>{const d=new Date(T0+x*DAY);return d.getUTCFullYear()+'年'+(d.getUTCMonth()+1)+'月'+d.getUTCDate()+'日'};
 const interp=(arr,x)=>{if(x<=0)return arr[0];for(let i=1;i<mDays.length;i++){if(x<=mDays[i]){const a=mDays[i-1],b=mDays[i];return arr[i-1]+(arr[i]-arr[i-1])*(x-a)/(b-a)}}return arr[arr.length-1]};
 const fmt=v=>(v>0?'+':v<0?'−':'')+Math.abs(v).toFixed(1)+'%';
 const fmtpp=v=>(v>0?'+':v<0?'−':'')+Math.abs(v).toFixed(1);
 const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const MQ=matchMedia('(max-width:640px)');let isM=MQ.matches;
 
 let actual=[{x:0,s:S0,h:H0,date:'2026-10-29'}];
-const MQ=matchMedia('(max-width:640px)');let isM=MQ.matches;
-let view='all',band=true,range=isM?'3m':'all',act=-1,ch;
+let view='all',range='3m',ch,rc,IND={s:[],h:[]};
 
-function colors(){return{star:css('--star'),hs:css('--hs'),starS:css('--star-soft'),hsS:css('--hs-soft'),grid:css('--grid'),ink3:css('--ink-3'),ink2:css('--ink-2'),rule:css('--rule')}}
-function fs(k,key){return mDays.map((x,i)=>({x,y:F[k][key][i]}))}
+function series(k){const m=new Map();HIST[k==='s'?'star50':'hstech'].forEach(([d,v])=>m.set(d,v));actual.forEach(r=>m.set(r.date,r[k]));return [...m.entries()].sort((a,b)=>a[0]<b[0]?-1:1)}
+function indicators(k){const ser=series(k);const c=ser.map(r=>r[1]);const out=[];let ag=0,al=0;
+ for(let i=0;i<c.length;i++){let rsi=null,bias=null;
+  if(i>=1&&i<=14){const g=Math.max(c[i]-c[i-1],0),l=Math.max(c[i-1]-c[i],0);ag+=g/14;al+=l/14}
+  else if(i>14){const g=Math.max(c[i]-c[i-1],0),l=Math.max(c[i-1]-c[i],0);ag=(ag*13+g)/14;al=(al*13+l)/14}
+  if(i>=14)rsi=al===0?100:100-100/(1+ag/al);
+  if(i>=19){const ma=c.slice(i-19,i+1).reduce((a,b)=>a+b,0)/20;bias=(c[i]/ma-1)*100}
+  let st=0,str=0;if(rsi!==null||bias!==null){const os=[rsi!==null&&rsi<30,bias!==null&&bias<-TH[k].bias].filter(Boolean).length,ob=[rsi!==null&&rsi>70,bias!==null&&bias>TH[k].bias].filter(Boolean).length;if(os){st=-1;str=os}else if(ob){st=1;str=ob}}
+  out.push({date:ser[i][0],x:dx(ser[i][0]),c:c[i],rsi,bias,st,str})}
+ return out}
+const stTxt=o=>o.st<0?(o.str>1?'超卖 · 强':'超卖'):o.st>0?(o.str>1?'超买 · 强':'超买'):'中性';
+
+function colors(){return{star:css('--star'),hs:css('--hs'),grid:css('--grid'),ink3:css('--ink-3'),ink2:css('--ink-2'),rule:css('--rule'),os:css('--os'),ob:css('--ob'),osb:css('--os-bg'),obb:css('--ob-bg'),panel:css('--panel')}}
+function fs(k){return mDays.map((x,i)=>({x,y:F[k].b[i]}))}
 function as(k){return actual.map(r=>({x:r.x,y:(r[k]/F[k].base-1)*100}))}
-
-const evPlugin={id:'ev',afterDatasetsDraw(c){const{ctx,chartArea:a,scales:{x}}=c;const k=colors();ctx.save();let lastPx=-99;E.forEach((e,i)=>{if(e.x<x.min||e.x>x.max)return;const px=x.getPixelForValue(e.x);const crowd=px-lastPx<(isM?16:18)&&i!==act;if(!crowd)lastPx=px;const on=i===act;ctx.strokeStyle=on?k.ink2:k.rule;ctx.lineWidth=on?1.5:1;ctx.setLineDash([3,4]);ctx.beginPath();ctx.moveTo(px,a.top+16);ctx.lineTo(px,a.bottom);ctx.stroke();ctx.setLineDash([]);if(crowd){ctx.restore();ctx.save();return}ctx.fillStyle=on?k.star:k.rule;ctx.beginPath();ctx.arc(px,a.top+8,isM?7:8,0,7);ctx.fill();ctx.fillStyle=on?'#fff':k.ink2;ctx.font='500 10px "IBM Plex Mono",monospace';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(i+1,px,a.top+8.5)});
- const y=c.scales.y;SIG.forEach(g=>{if((g.k==='s'&&view==='h')||(g.k==='h'&&view==='s'))return;const v=(g.lv/F[g.k].base-1)*100;if(v<y.min||v>y.max)return;const py=y.getPixelForValue(v);const col=g.k==='s'?k.star:k.hs;ctx.strokeStyle=col;ctx.globalAlpha=.75;ctx.lineWidth=1.2;ctx.setLineDash([2,4]);ctx.beginPath();const xe=g.until?Math.min(a.right,x.getPixelForValue(Math.round((Date.parse(g.until)-T0)/DAY))):a.right;ctx.moveTo(a.left,py);ctx.lineTo(xe,py);ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=1;ctx.fillStyle=col;ctx.font='500 '+(isM?9.5:10.5)+'px "Noto Sans SC",sans-serif';ctx.textAlign='left';ctx.textBaseline='top';ctx.fillText((isM?g.t.replace(' 信号',''):g.t)+' '+g.lv,a.left+4,py+3)});
- if(X3>=x.min&&X3<=x.max){const px=x.getPixelForValue(X3);ctx.strokeStyle=k.ink3;ctx.lineWidth=1.4;ctx.setLineDash([7,5]);ctx.beginPath();ctx.moveTo(px,a.top);ctx.lineTo(px,a.bottom);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle=k.ink3;ctx.font='500 '+(isM?10:11)+'px "Noto Sans SC",sans-serif';ctx.textBaseline='top';ctx.textAlign='right';if(px-70>a.left)ctx.fillText('未来三个月',px-6,a.top+22);if(px+70<a.right){ctx.textAlign='left';ctx.fillText('远期推演',px+6,a.top+22)}}
- const last=actual[actual.length-1];if(last.x>=x.min&&last.x<=x.max){const px=x.getPixelForValue(last.x);ctx.fillStyle=k.ink3;ctx.font='400 11px "Noto Sans SC",sans-serif';ctx.textAlign='left';ctx.fillText('今天',Math.min(px+6,a.right-30),a.bottom-8)}ctx.restore()}};
-
-function datasets(){const k=colors();const showS=view!=='h',showH=view!=='s';return[
- {id:'sp',data:fs('s','p'),borderWidth:0,tension:.35,pointRadius:0,fill:false,hidden:!(showS&&band)},
- {id:'so',data:fs('s','o'),borderWidth:0,tension:.35,pointRadius:0,fill:'-1',backgroundColor:k.starS,hidden:!(showS&&band)},
- {id:'hp',data:fs('h','p'),borderWidth:0,tension:.35,pointRadius:0,fill:false,hidden:!(showH&&band)},
- {id:'ho',data:fs('h','o'),borderWidth:0,tension:.35,pointRadius:0,fill:'-1',backgroundColor:k.hsS,hidden:!(showH&&band)},
- {id:'sf',data:fs('s','b'),borderColor:k.star,borderWidth:2,borderDash:[6,5],tension:.35,pointRadius:0,hidden:!showS},
- {id:'hf',data:fs('h','b'),borderColor:k.hs,borderWidth:2,borderDash:[6,5],tension:.35,pointRadius:0,hidden:!showH},
- {id:'sa',data:as('s'),borderColor:k.star,backgroundColor:k.star,borderWidth:2.8,tension:0,pointRadius:c=>c.dataIndex===actual.length-1?4.5:0,pointBorderColor:css('--panel'),pointBorderWidth:2,hidden:!showS},
- {id:'ha',data:as('h'),borderColor:k.hs,backgroundColor:k.hs,borderWidth:2.8,tension:0,pointStyle:'rectRot',pointRadius:c=>c.dataIndex===actual.length-1?5.5:0,pointBorderColor:css('--panel'),pointBorderWidth:2,hidden:!showH}]}
-
 function xRange(){if(range==='3m')return{min:-2,max:X3+4};if(range==='done'){const last=actual[actual.length-1].x;return{min:-2,max:Math.max(21,last+14)}}return{min:-5,max:mDays[24]+5}}
 function tick(v){const d=new Date(T0+v*DAY);return (d.getUTCFullYear()%100)+'/'+String(d.getUTCMonth()+1).padStart(2,'0')}
+function sigAt(k,x){return IND[k].find(o=>o.x===x)}
 
-function tipHTML(x){x=Math.round(x);const rows=[];const near=actual.reduce((b,r)=>Math.abs(r.x-x)<Math.abs(b.x-x)?r:b,actual[0]);const hasA=Math.abs(near.x-x)<=3;const ax=hasA?near.x:x;
- const line=(k,name)=>{const f=interp(F[k].b,ax),lo=interp(F[k].p,ax),hi=interp(F[k].o,ax);let s='<div class="r"><span>'+name+' 推演</span><span class="num">'+fmt(f)+' · '+Math.round(F[k].base*(1+f/100))+'点</span></div>';const lo2=Math.round(F[k].base*(1+lo/100)),hi2=Math.round(F[k].base*(1+hi/100));if(band)s+='<div class="r"><span>　50%区间</span><span class="num">'+lo2+' ~ '+hi2+'点</span></div>';if(hasA){const a=(near[k]/F[k].base-1)*100;s+='<div class="r"><span>'+name+' 实盘</span><span class="num">'+fmt(a)+' · '+near[k].toFixed(2)+'</span></div><div class="r"><span>　偏离</span><span class="num">'+fmtpp(a-f)+' 个百分点</span></div>'}return s};
+const deco={id:'deco',afterDatasetsDraw(c){const{ctx,chartArea:a,scales:{x}}=c;const k=colors();ctx.save();
+ E.forEach(e=>{if(e.x<x.min||e.x>x.max)return;const px=x.getPixelForValue(e.x);ctx.strokeStyle=k.rule;ctx.lineWidth=1;ctx.setLineDash([2,4]);ctx.beginPath();ctx.moveTo(px,a.top);ctx.lineTo(px,a.bottom);ctx.stroke()});ctx.setLineDash([]);
+ if(X3>=x.min&&X3<=x.max){const px=x.getPixelForValue(X3);ctx.strokeStyle=k.ink3;ctx.lineWidth=1.4;ctx.setLineDash([7,5]);ctx.beginPath();ctx.moveTo(px,a.top);ctx.lineTo(px,a.bottom);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle=k.ink3;ctx.font='500 '+(isM?10:11)+'px "Noto Sans SC",sans-serif';ctx.textBaseline='top';if(px-70>a.left){ctx.textAlign='right';ctx.fillText('未来三个月',px-6,a.top+4)}if(px+64<a.right){ctx.textAlign='left';ctx.fillText('远期推演',px+6,a.top+4)}}
+ ['s','h'].forEach(kk=>{if((kk==='s'&&view==='h')||(kk==='h'&&view==='s'))return;actual.forEach(r=>{const o=sigAt(kk,r.x);if(!o||!o.st||r.x<x.min||r.x>x.max)return;const px=x.getPixelForValue(r.x),py=c.scales.y.getPixelForValue((r[kk]/F[kk].base-1)*100);const s=o.str>1?7:5.5;ctx.fillStyle=o.st<0?k.os:k.ob;ctx.strokeStyle=k.panel;ctx.lineWidth=1.5;ctx.beginPath();if(o.st<0){const y0=py+9;ctx.moveTo(px,y0);ctx.lineTo(px-s,y0+s*1.6);ctx.lineTo(px+s,y0+s*1.6)}else{const y0=py-9;ctx.moveTo(px,y0);ctx.lineTo(px-s,y0-s*1.6);ctx.lineTo(px+s,y0-s*1.6)}ctx.closePath();ctx.fill();ctx.stroke()})});
+ const last=actual[actual.length-1];if(last.x>=x.min&&last.x<=x.max){const px=x.getPixelForValue(last.x);ctx.fillStyle=k.ink3;ctx.font='400 11px "Noto Sans SC",sans-serif';ctx.textAlign='left';ctx.textBaseline='alphabetic';ctx.fillText('今天',Math.min(px+6,a.right-30),a.bottom-8)}ctx.restore()}};
+
+function tipHTML(x){x=Math.round(x);const near=actual.reduce((b,r)=>Math.abs(r.x-x)<Math.abs(b.x-x)?r:b,actual[0]);const hasA=Math.abs(near.x-x)<=3;const ax=hasA?near.x:x;
+ const line=(k,name)=>{const f=interp(F[k].b,ax);let s='<div class="r"><span>'+name+' 最可能</span><span class="num">'+fmt(f)+' · '+Math.round(F[k].base*(1+f/100))+'</span></div>';
+  if(hasA){const a=(near[k]/F[k].base-1)*100;const o=sigAt(k,near.x);s+='<div class="r"><span>'+name+' 实盘</span><span class="num">'+fmt(a)+' · '+near[k].toFixed(2)+'</span></div>';if(o)s+='<div class="r"><span>　信号</span><span>'+stTxt(o)+(o.rsi!==null?' · RSI '+o.rsi.toFixed(0):'')+'</span></div>'}return s};
  let h='<h3>'+dayToDate(ax)+(hasA?'':'（推演）')+(ax>X3?' · 远期':'')+'</h3>';if(view!=='h')h+=line('s','科创50');if(view!=='s')h+=line('h','恒生科技');
- const ev=E.map((e,i)=>({e,i})).filter(o=>Math.abs(o.e.x-ax)<=10);ev.forEach(o=>{h+='<div class="ev"><b style="color:var(--ink);font-weight:500">事件'+(o.i+1)+'：'+o.e.t+'</b><br>概率：'+o.e.p+'<br>影响：'+o.e.m+'</div>'});return h}
-
-function showTip(x,px,py){if(isM){document.getElementById('tipm').innerHTML=tipHTML(x);return}const t=document.getElementById('tip');t.innerHTML=tipHTML(x);const w=document.querySelector('.cw').clientWidth;const tw=t.offsetWidth;let l=px+14;if(l+tw>w)l=Math.max(0,px-tw-14);t.style.left=l+'px';t.style.top=Math.max(0,Math.min(py-20,document.querySelector('.cw').clientHeight-t.offsetHeight))+'px';t.style.opacity=1}
+ E.filter(e=>Math.abs(e.x-ax)<=10).forEach(e=>{h+='<div class="ev"><b style="color:var(--ink);font-weight:500">'+e.t+'</b>（'+e.d.slice(5).replace('-','/')+'）<br>'+e.m+'</div>'});return h}
+function showTip(x,px,py){if(isM){document.getElementById('tipm').innerHTML=tipHTML(x);return}const t=document.getElementById('tip');t.innerHTML=tipHTML(x);const cw=document.querySelector('.cw');const tw=t.offsetWidth;let l=px+14;if(l+tw>cw.clientWidth)l=Math.max(0,px-tw-14);t.style.left=l+'px';t.style.top=Math.max(0,Math.min(py-20,cw.clientHeight-t.offsetHeight))+'px';t.style.opacity=1}
 function hideTip(){if(isM)return;document.getElementById('tip').style.opacity=0}
 
-function build(){const k=colors();const r=xRange();
+function build(){const k=colors();const r=xRange();const showS=view!=='h',showH=view!=='s';
  if(ch)ch.destroy();
- ch=new Chart(document.getElementById('c'),{type:'line',data:{datasets:datasets()},plugins:[evPlugin],
- options:{responsive:true,maintainAspectRatio:false,animation:false,parsing:true,interaction:{mode:'nearest',axis:'x',intersect:false},layout:{padding:{top:4,right:6}},
-  scales:{x:{type:'linear',min:r.min,max:r.max,afterBuildTicks:ax=>{const step=range==='all'?(isM?4:2):1;const t=[];for(let i=0;i<=26;i+=step){const v=Math.round((Date.UTC(2026,10+i,1)-T0)/DAY);if(v>=ax.min&&v<=ax.max)t.push({value:v})}ax.ticks=t},grid:{display:false},border:{color:k.rule},ticks:{color:k.ink3,font:{size:11,family:'IBM Plex Mono'},callback:tick,maxRotation:0,autoSkipPadding:18,stepSize:range==='all'?(isM?122:61):range==='3m'?(isM?21:14):7}},
-   y:{grid:{color:k.grid},border:{display:false},ticks:{color:k.ink3,font:{size:11,family:'IBM Plex Mono'},callback:v=>(v>0?'+':'')+v+'%'}}},
-  plugins:{legend:{display:false},tooltip:{enabled:false}},
-  onClick:(e,_,c)=>{const xs=c.scales.x;if(e.x>=c.chartArea.left&&e.x<=c.chartArea.right)showTip(xs.getValueForPixel(e.x),e.x,e.y)},
-  onHover:(e,_,c)=>{const xs=c.scales.x;if(e.x<c.chartArea.left||e.x>c.chartArea.right){hideTip();return}showTip(xs.getValueForPixel(e.x),e.x,e.y)}}});
- document.getElementById('c').onmouseleave=()=>{if(act<0)hideTip()};
- const cv=document.getElementById('c');const tp=ev=>{const pt=ev.touches?ev.touches[0]:ev;const rc=cv.getBoundingClientRect();const px=pt.clientX-rc.left,py=pt.clientY-rc.top;const ca=ch.chartArea;if(px<ca.left||px>ca.right)return;showTip(ch.scales.x.getValueForPixel(px),px,py)};
- cv.ontouchstart=tp;cv.ontouchmove=tp;cv.onpointerdown=ev=>{if(ev.pointerType!=='mouse')tp(ev)};
-}
+ ch=new Chart(document.getElementById('c'),{type:'line',data:{datasets:[
+  {data:fs('s'),borderColor:k.star,borderWidth:2,borderDash:[6,5],tension:.35,pointRadius:0,hidden:!showS},
+  {data:fs('h'),borderColor:k.hs,borderWidth:2,borderDash:[6,5],tension:.35,pointRadius:0,hidden:!showH},
+  {data:as('s'),borderColor:k.star,backgroundColor:k.star,borderWidth:2.8,pointRadius:c=>c.dataIndex===actual.length-1?4.5:0,pointBorderColor:k.panel,pointBorderWidth:2,hidden:!showS},
+  {data:as('h'),borderColor:k.hs,backgroundColor:k.hs,borderWidth:2.8,pointStyle:'rectRot',pointRadius:c=>c.dataIndex===actual.length-1?5.5:0,pointBorderColor:k.panel,pointBorderWidth:2,hidden:!showH}]},
+  plugins:[deco],
+  options:{responsive:true,maintainAspectRatio:false,animation:false,interaction:{mode:'nearest',axis:'x',intersect:false},layout:{padding:{top:6,right:6}},
+   scales:{x:{type:'linear',min:r.min,max:r.max,afterBuildTicks:ax=>{const step=range==='all'?(isM?4:2):1;const t=[];for(let i=0;i<=26;i+=step){const v=Math.round((Date.UTC(2026,10+i,1)-T0)/DAY);if(v>=ax.min&&v<=ax.max)t.push({value:v})}ax.ticks=t},grid:{display:false},border:{color:k.rule},ticks:{color:k.ink3,font:{size:11,family:'IBM Plex Mono'},callback:tick,maxRotation:0}},
+    y:{grid:{color:k.grid},border:{display:false},grace:'8%',ticks:{color:k.ink3,font:{size:11,family:'IBM Plex Mono'},callback:v=>(v>0?'+':'')+v+'%'}}},
+   plugins:{legend:{display:false},tooltip:{enabled:false}},
+   onHover:(e,_,c)=>{if(e.x<c.chartArea.left||e.x>c.chartArea.right){hideTip();return}showTip(c.scales.x.getValueForPixel(e.x),e.x,e.y)}}});
+ const cv=document.getElementById('c');cv.onmouseleave=hideTip;const tp=ev=>{const pt=ev.touches?ev.touches[0]:ev;const b=cv.getBoundingClientRect();const px=pt.clientX-b.left,py=pt.clientY-b.top;const ca=ch.chartArea;if(px<ca.left||px>ca.right)return;showTip(ch.scales.x.getValueForPixel(px),px,py)};cv.ontouchstart=tp;cv.ontouchmove=tp;cv.onpointerdown=ev=>{if(ev.pointerType!=='mouse')tp(ev)};
+ buildRSI(k)}
 
-function updateCards(){const last=actual[actual.length-1];[['s','s'],['h','h']].forEach(([k,p])=>{const a=(last[k]/F[k].base-1)*100,f=interp(F[k].b,last.x),d=a-f;const ea=document.getElementById(p+'-a');ea.textContent=fmt(a);ea.style.color=a>0?'var(--up)':a<0?'var(--down)':'var(--ink)';document.getElementById(p+'-f').textContent=fmt(f);const ed=document.getElementById(p+'-d');ed.textContent=fmtpp(d);ed.title='实盘减推演，单位为百分点';document.getElementById(p+'-m').textContent='收盘 '+last[k].toFixed(2)+' 点 · '+dayToDate(last.x)+' · 偏离单位为百分点'});
- ['s','h'].forEach(k=>{const sg=SIG.filter(g=>g.k===k);const hit=sg.map(g=>{const lim=g.until?Math.round((Date.parse(g.until)-T0)/DAY):1e9;const r=actual.find(r=>r.x>0&&r.x<=lim&&(g.dir==='up'?r[k]>=g.lv:r[k]<=g.lv));return r?{g,r}:null}).filter(Boolean);const el=document.getElementById(k+'-sig');if(hit.length){const h=hit[0];el.innerHTML='<b style="color:'+(h.g.dir==='up'?'var(--up)':'var(--down)')+';font-weight:500">已触发'+(h.g.dir==='up'?'乐观':'悲观')+'信号</b>（'+dayToDate(h.r.x)+'）：'+h.g.m}else{el.textContent='信号：未触发（乐观线 '+sg[0].lv+' · 悲观线 '+sg[1].lv+'），按基准情形'}document.getElementById(k+'-lv').textContent='关键点位：'+LV[k]});
- document.getElementById('upd').textContent=actual.length>1?'实盘已更新到'+dayToDate(last.x)+'，共'+actual.length+'个交易日。每个工作日收盘后自动更新。A股涨为红、跌为绿。':'目前只有起点。每个工作日收盘后会自动补上当天收盘价。A股涨为红、跌为绿。';
- E.forEach((e,i)=>{const r=document.querySelectorAll('.evr')[i];if(r)r.classList.toggle('done',e.x<=last.x)})}
+function buildRSI(k){if(rc)rc.destroy();const sI=IND.s.filter(o=>o.rsi!==null),hI=IND.h.filter(o=>o.rsi!==null);const dates=[...new Set([...sI,...hI].map(o=>o.date))].sort();const map=a=>{const m=new Map(a.map(o=>[o.date,o.rsi]));return dates.map(d=>m.has(d)?m.get(d):null)};const startIdx=dates.indexOf('2026-10-29');
+ const zones={id:'zones',beforeDatasetsDraw(c){const{ctx,chartArea:a,scales:{y,x}}=c;ctx.save();ctx.fillStyle=k.obb;ctx.fillRect(a.left,y.getPixelForValue(100),a.width,y.getPixelForValue(70)-y.getPixelForValue(100));ctx.fillStyle=k.osb;ctx.fillRect(a.left,y.getPixelForValue(30),a.width,y.getPixelForValue(0)-y.getPixelForValue(30));ctx.font='500 10.5px "Noto Sans SC",sans-serif';ctx.textAlign='right';ctx.textBaseline='top';ctx.fillStyle=k.ob;ctx.fillText('超买区 >70',a.right-4,y.getPixelForValue(100)+3);ctx.fillStyle=k.os;ctx.textBaseline='bottom';ctx.fillText('超卖区 <30',a.right-4,y.getPixelForValue(0)-3);
+  if(startIdx>=0){const px=x.getPixelForValue(startIdx);ctx.strokeStyle=k.ink3;ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(px,a.top);ctx.lineTo(px,a.bottom);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle=k.ink3;ctx.textAlign='right';ctx.textBaseline='top';ctx.fillText('起点',px-4,a.top+a.height*0.36)}ctx.restore()}};
+ rc=new Chart(document.getElementById('r'),{type:'line',data:{labels:dates.map(d=>d.slice(5).replace('-','/')),datasets:[
+  {label:'科创50',data:map(sI),borderColor:k.star,borderWidth:2,pointRadius:0,tension:.25,spanGaps:true,hidden:view==='h'},
+  {label:'恒生科技',data:map(hI),borderColor:k.hs,borderWidth:2,borderDash:[5,3],pointRadius:0,tension:.25,spanGaps:true,hidden:view==='s'}]},
+  plugins:[zones],
+  options:{responsive:true,maintainAspectRatio:false,animation:false,interaction:{mode:'index',intersect:false},
+   scales:{x:{grid:{display:false},border:{color:k.rule},ticks:{color:k.ink3,font:{size:10.5,family:'IBM Plex Mono'},maxRotation:0,autoSkip:true,maxTicksLimit:isM?5:8}},y:{min:0,max:100,grid:{color:k.grid},border:{display:false},ticks:{color:k.ink3,font:{size:10.5,family:'IBM Plex Mono'},stepSize:isM?50:10,callback:v=>[0,30,50,70,100].includes(v)?v:''}}},
+   plugins:{legend:{display:false},tooltip:{backgroundColor:k.panel,titleColor:css('--ink'),bodyColor:k.ink2,borderColor:k.rule,borderWidth:1,padding:8,callbacks:{label:it=>' '+it.dataset.label+' RSI '+(it.raw==null?'—':it.raw.toFixed(1))}}}}})}
 
-function renderEvents(){const box=document.getElementById('evs');box.innerHTML='';E.forEach((e,i)=>{const r=document.createElement('div');r.className='evr';r.tabIndex=0;r.innerHTML='<span class="n">'+String(i+1).padStart(2,'0')+'</span><span class="d num">'+e.d.slice(2).replace(/-/g,'/')+'</span><span class="t">'+e.t+'</span><span class="p">'+e.p+'</span><span class="m">'+e.m+'</span>';
- const on=()=>{act=i;document.querySelectorAll('.evr').forEach(x=>x.classList.remove('on'));r.classList.add('on');if(e.x>ch.scales.x.max||e.x<ch.scales.x.min){range='all';setBtns();build()}ch.draw();const px=ch.scales.x.getPixelForValue(e.x);const yv=view==='h'?interp(F.h.b,e.x):interp(F.s.b,e.x);showTip(e.x,px,ch.scales.y.getPixelForValue(yv))};
- const off=()=>{act=-1;r.classList.remove('on');ch.draw();hideTip()};
- r.onmouseenter=on;r.onfocus=on;r.onmouseleave=off;r.onblur=off;box.appendChild(r)})}
+function updateCards(){IND={s:indicators('s'),h:indicators('h')};const last=actual[actual.length-1];
+ [['s','科创50'],['h','恒生科技']].forEach(([k])=>{const a=(last[k]/F[k].base-1)*100,f=interp(F[k].b,last.x),d=a-f;const ea=document.getElementById(k+'-a');ea.textContent=fmt(a);ea.style.color=a>0?'var(--up)':a<0?'var(--down)':'var(--ink)';document.getElementById(k+'-f').textContent=fmt(f);document.getElementById(k+'-d').textContent=fmtpp(d);
+  const o=IND[k][IND[k].length-1];const p=document.getElementById(k+'-pill');p.textContent=stTxt(o);p.className='pill'+(o.st<0?' os':o.st>0?' ob':'');
+  document.getElementById(k+'-ind').innerHTML='RSI <b class="num">'+(o.rsi!==null?o.rsi.toFixed(1):'—')+'</b> · 偏离20日均线 <b class="num">'+(o.bias!==null?fmt(o.bias):'—')+'</b>（警戒线 ±'+TH[k].bias+'%）';
+  document.getElementById(k+'-m').textContent='收盘 '+last[k].toFixed(2)+' · '+dayToDate(last.x)+' · 偏离=实盘减最可能，单位为百分点'});
+ document.getElementById('upd').textContent=(actual.length>1?'实盘已更新到'+dayToDate(last.x)+'。':'目前只有起点。')+'每个工作日收盘后自动更新。三角形标出实盘出现超买或超卖的交易日。'}
 
-function setBtns(){[['v-all','all'],['v-s','s'],['v-h','h']].forEach(([id,v])=>document.getElementById(id).setAttribute('aria-pressed',view===v));document.getElementById('v-band').setAttribute('aria-pressed',band);[['r-all','all'],['r-3m','3m'],['r-done','done']].forEach(([id,v])=>document.getElementById(id).setAttribute('aria-pressed',range===v))}
-document.getElementById('v-all').onclick=()=>{view='all';setBtns();build()};
-document.getElementById('v-s').onclick=()=>{view='s';setBtns();build()};
-document.getElementById('v-h').onclick=()=>{view='h';setBtns();build()};
-document.getElementById('v-band').onclick=()=>{band=!band;setBtns();build()};
-document.getElementById('r-all').onclick=()=>{range='all';setBtns();build()};
-document.getElementById('r-3m').onclick=()=>{range='3m';setBtns();build()};
-document.getElementById('r-done').onclick=()=>{range='done';setBtns();build()};
+function setBtns(){[['v-all','all'],['v-s','s'],['v-h','h']].forEach(([id,v])=>document.getElementById(id).setAttribute('aria-pressed',view===v));[['r-all','all'],['r-3m','3m'],['r-done','done']].forEach(([id,v])=>document.getElementById(id).setAttribute('aria-pressed',range===v))}
+[['v-all','all'],['v-s','s'],['v-h','h']].forEach(([id,v])=>document.getElementById(id).onclick=()=>{view=v;setBtns();build()});
+[['r-all','all'],['r-3m','3m'],['r-done','done']].forEach(([id,v])=>document.getElementById(id).onclick=()=>{range=v;setBtns();build()});
 MQ.addEventListener?.('change',e=>{isM=e.matches;build()});
 matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',()=>build());
 new MutationObserver(()=>build()).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
 
-renderEvents();build();updateCards();
+updateCards();setBtns();build();
 
 (async()=>{try{const r=await fetch('data.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();
- const rows=(j.rows||[]).filter(r=>r&&typeof r.date==='string'&&Number.isFinite(+r.star50)&&Number.isFinite(+r.hstech)).map(r=>({date:r.date,x:Math.round((Date.parse(r.date)-T0)/DAY),s:+r.star50,h:+r.hstech})).filter(r=>r.x>0).sort((a,b)=>a.x-b.x);
- actual=[{x:0,s:S0,h:H0,date:'2026-10-29'}].concat(rows);build();updateCards()}catch(e){}})();
+ const rows=(j.rows||[]).filter(r=>r&&typeof r.date==='string'&&Number.isFinite(+r.star50)&&Number.isFinite(+r.hstech)).map(r=>({date:r.date,x:dx(r.date),s:+r.star50,h:+r.hstech})).filter(r=>r.x>0).sort((a,b)=>a.x-b.x);
+ actual=[{x:0,s:S0,h:H0,date:'2026-10-29'}].concat(rows);updateCards();build()}catch(e){}})();
 </script>
 
 </body>
