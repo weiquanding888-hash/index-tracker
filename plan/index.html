@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f5f6f8">
+<title>科技股调仓时间轴</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@700&family=Noto+Sans+SC:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0}
+/* Layout: an operating console. Alerts → current posture → K-line with forecast and nodes → node playbook (signal → price → action) → rebalancing route → alert rules and news. */
+:root{
+  --bg:#f5f6f8;--panel:#ffffff;--ink:#14171c;--ink-2:#4a515c;--ink-3:#868d98;--rule:#e2e5ea;--grid:#eceef2;--chip:#eef1f6;
+  --accent:#2563c9;--accent-bg:#e7effb;
+  --up:#d03a2f;--down:#1f8a52;--fc:#2563c9;
+  --bad:#c23b32;--bad-bg:#fbe8e6;--warn:#b7791f;--warn-bg:#fbf0dc;--good:#1f8a52;--good-bg:#e3f4ea;--os:#0f8a8a;--ob:#b7791f;
+  --c-hs:#d4562a;--c-rb:#0f8a8a;--c-ai:#2563c9;--c-ce:#8a63c9;--c-cash:#c9ced6;
+  --f-display:"Noto Serif SC","Songti SC",serif;--f-body:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;--f-num:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#111418;--panel:#181c22;--ink:#e9ecf1;--ink-2:#b3bac5;--ink-3:#7d8591;--rule:#2a3039;--grid:#20252d;--chip:#222833;
+  --accent:#5b93ec;--accent-bg:#1a2a44;--up:#ef6b62;--down:#43b97a;--fc:#5b93ec;
+  --bad:#ef6b62;--bad-bg:#3a1c1a;--warn:#e3a54a;--warn-bg:#3a2c14;--good:#43b97a;--good-bg:#14301f;--os:#3cc3c0;--ob:#e3a54a;
+  --c-hs:#ec7a4f;--c-rb:#3cc3c0;--c-ai:#5b93ec;--c-ce:#a98be0;--c-cash:#3a414c;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111418;--panel:#181c22;--ink:#e9ecf1;--ink-2:#b3bac5;--ink-3:#7d8591;--rule:#2a3039;--grid:#20252d;--chip:#222833;
+  --accent:#5b93ec;--accent-bg:#1a2a44;--up:#ef6b62;--down:#43b97a;--fc:#5b93ec;
+  --bad:#ef6b62;--bad-bg:#3a1c1a;--warn:#e3a54a;--warn-bg:#3a2c14;--good:#43b97a;--good-bg:#14301f;--os:#3cc3c0;--ob:#e3a54a;
+  --c-hs:#ec7a4f;--c-rb:#3cc3c0;--c-ai:#5b93ec;--c-ce:#a98be0;--c-cash:#3a414c;color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.6;-webkit-text-size-adjust:100%}
+.wrap{max-width:1040px;margin:0 auto;padding-block:24px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:18px}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(23px,4.2vw,32px);line-height:1.3;margin:0;text-wrap:balance}
+h2{font-size:16.5px;font-weight:500;margin:0}
+h3{margin:0;font-weight:500}
+p{margin:0}
+.num{font-family:var(--f-num);font-variant-numeric:tabular-nums}
+.muted{color:var(--ink-3);font-size:12.5px}
+.sub{color:var(--ink-2);font-size:14px;margin-top:6px;max-width:64ch}
+.ver{display:inline-flex;gap:6px;align-items:center;margin-top:8px;font-size:12px;color:var(--ink-3)}
+.ver b{font-weight:500;color:var(--warn);background:var(--warn-bg);padding:1px 8px;border-radius:999px}
+.panel{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:14px 16px}
+.sh{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 12px;margin-bottom:10px}
+.alerts{display:flex;flex-direction:column;gap:8px}
+.al{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:start;padding:10px 12px;border-radius:8px;font-size:13.5px}
+.al .tg{font-size:11.5px;font-weight:500;padding:2px 8px;border-radius:999px;white-space:nowrap;margin-top:1px}
+.al.bad{background:var(--bad-bg)}.al.bad .tg{background:var(--bad);color:var(--panel)}
+.al.warn{background:var(--warn-bg)}.al.warn .tg{background:var(--warn);color:var(--panel)}
+.al.good{background:var(--good-bg)}.al.good .tg{background:var(--good);color:var(--panel)}
+.al.info{background:var(--accent-bg)}.al.info .tg{background:var(--accent);color:var(--panel)}
+.al b{font-weight:500}
+.posture{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:16px}
+.posture .ph{font-size:12px;color:var(--ink-3)}
+.posture .pn{font-size:20px;font-weight:500;margin:2px 0 4px}
+.posture .why{font-size:13px;color:var(--ink-2)}
+.stack{display:flex;height:26px;border-radius:6px;overflow:hidden;gap:2px;background:var(--panel)}
+.stack i{display:flex;align-items:center;justify-content:center;font-style:normal;font-size:11.5px;font-weight:500;color:#fff;min-width:0;overflow:hidden;white-space:nowrap}
+.stack i.cash{color:var(--ink-2)}
+.leg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--ink-2);margin-top:8px}
+.leg span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:10px;height:10px;border-radius:2px;display:inline-block}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:center;margin-bottom:8px}
+.seg{display:inline-flex;background:var(--chip);border-radius:8px;padding:3px;gap:2px}
+.seg button{font:inherit;font-size:13px;border:0;background:transparent;color:var(--ink-2);padding:5px 12px;border-radius:6px;cursor:pointer;min-height:32px}
+.seg button[aria-pressed="true"]{background:var(--panel);color:var(--ink);box-shadow:0 0 0 1px var(--rule)}
+.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+#kc{height:420px;position:relative}
+.kleg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:11.5px;color:var(--ink-3);margin-top:8px}
+.kleg span{display:inline-flex;align-items:center;gap:5px}
+.hol{width:9px;height:12px;border:1.5px solid var(--up);border-radius:1px;display:inline-block}
+.sol{width:9px;height:12px;background:var(--up);border-radius:1px;display:inline-block}
+.dl{width:16px;border-top:2px dashed var(--fc);display:inline-block}
+.hl{width:16px;border-top:1px dashed var(--ink-3);display:inline-block}
+#det{margin-top:10px;padding:10px 12px;border:1px solid var(--rule);border-radius:8px;font-size:13px;color:var(--ink-2);min-height:84px}
+#det h3{font-size:14px;color:var(--ink);margin-bottom:4px}
+#det .g{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:2px 14px}
+#det .g div{display:flex;justify-content:space-between;gap:8px}
+#det .g span:last-child{font-family:var(--f-num);color:var(--ink)}
+#det .ev{margin-top:6px;padding-top:6px;border-top:1px solid var(--rule)}
+.nodes{display:flex;flex-direction:column;gap:10px}
+.nd{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.nd.key{border-color:var(--accent)}
+.nd.soon{box-shadow:0 0 0 2px var(--warn)}
+.nd.past{opacity:.72}
+.nh{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+.nh .no{font-family:var(--f-num);font-size:12px;color:var(--panel);background:var(--ink-3);border-radius:999px;min-width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;padding:0 6px}
+.nd.key .nh .no{background:var(--accent)}
+.nh .dt{font-family:var(--f-num);font-size:13px;color:var(--ink-2)}
+.nh h3{font-size:15.5px}
+.nh .cd{font-size:12px;font-weight:500;padding:2px 8px;border-radius:999px;background:var(--chip);color:var(--ink-2)}
+.nh .cd.soon{background:var(--warn-bg);color:var(--warn)}
+.nh .kk{font-size:11.5px;font-weight:500;color:var(--accent);background:var(--accent-bg);padding:2px 8px;border-radius:999px}
+.watch{font-size:13px;color:var(--ink-2)}
+.watch b{font-weight:500;color:var(--ink)}
+.br{display:flex;flex-direction:column;border:1px solid var(--rule);border-radius:8px;overflow:hidden}
+.brr{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr) minmax(0,1.35fr);gap:10px;padding:10px 12px;border-top:1px solid var(--rule);font-size:13px;align-items:start}
+.brr:first-child{border-top:0}
+.brr.hd{background:var(--chip);font-size:11.5px;color:var(--ink-3);padding:6px 12px}
+.brr .if{color:var(--ink)}
+.brr .px{color:var(--ink-2)}
+.acts{display:flex;flex-direction:column;gap:4px}
+.act{display:flex;gap:6px;align-items:baseline;font-size:12.5px;color:var(--ink-2)}
+.act i{font-style:normal;font-weight:500;font-size:11.5px;padding:1px 7px;border-radius:4px;white-space:nowrap}
+.act i.add{background:var(--accent-bg);color:var(--accent)}
+.act i.cut{background:var(--warn-bg);color:var(--warn)}
+.act i.hold{background:var(--chip);color:var(--ink-2)}
+.act i.stop{background:var(--bad-bg);color:var(--bad)}
+.act b{font-weight:500;color:var(--ink)}
+.route{display:flex;flex-direction:column;gap:10px}
+.rt{display:grid;grid-template-columns:minmax(0,0.9fr) minmax(0,1.6fr);gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--rule)}
+.rt:first-child{border-top:0;padding-top:0}
+.rt h3{font-size:14px}
+.rt p{font-size:12.5px;color:var(--ink-3);margin-top:2px}
+.rt.now h3::after{content:"当前";margin-left:6px;font-size:11px;font-weight:500;color:var(--warn);background:var(--warn-bg);padding:1px 7px;border-radius:999px}
+.rules{display:flex;flex-direction:column}
+.ru{display:grid;grid-template-columns:12px minmax(0,1.4fr) minmax(0,1fr) auto;gap:10px;align-items:baseline;padding:9px 2px;border-top:1px solid var(--rule);font-size:13px}
+.ru:first-child{border-top:0}
+.ru .lt{width:10px;height:10px;border-radius:50%;align-self:center}
+.lt.on{background:var(--bad)}.lt.near{background:var(--warn)}.lt.off{background:var(--rule)}.lt.ok{background:var(--good)}
+.ru .v{font-family:var(--f-num);font-size:12.5px;color:var(--ink-2)}
+.ru .s{font-size:12px;color:var(--ink-3);text-align:right}
+.ru .s.on{color:var(--bad);font-weight:500}.ru .s.near{color:var(--warn);font-weight:500}
+.news{display:flex;flex-direction:column}
+.nw{display:grid;grid-template-columns:62px minmax(0,1fr);gap:10px;padding:9px 0;border-top:1px solid var(--rule);font-size:13px}
+.nw:first-child{border-top:0}
+.nw .d{font-family:var(--f-num);color:var(--ink-3);font-size:12px}
+.nw b{font-weight:500}
+.nw .im{font-size:12px;color:var(--ink-3)}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}
+.foot{font-size:12px;color:var(--ink-3)}
+@media (max-width:720px){
+  .wrap{padding-block:14px 32px;gap:14px}
+  .posture,.two{grid-template-columns:1fr}
+  #kc{height:340px}
+  .brr{grid-template-columns:1fr;gap:4px}
+  .brr.hd{display:none}
+  .brr .px::before{content:"股价：";color:var(--ink-3)}
+  .brr .if::before{content:"信号：";color:var(--ink-3)}
+  .rt{grid-template-columns:1fr;gap:6px}
+  .ru{grid-template-columns:12px minmax(0,1fr) auto}
+  .ru .v{grid-column:2}
+}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>科技股调仓时间轴</h1>
+    <p class="sub">把每个关键节点拆成三步：出现什么信号、股价可能怎么走、仓位怎么调。K线是实盘，虚线是最可能路径，圆点编号是节点。</p>
+    <span class="ver"><b>界面预览 v1</b>数据截至2026年10月30日 · 自动抓取尚未接入</span>
+  </header>
+
+  <section aria-label="提示">
+    <div class="alerts" id="alerts"></div>
+  </section>
+
+  <section class="panel" aria-label="当前阶段">
+    <div class="posture">
+      <div>
+        <div class="ph">当前阶段（按日期和信号线自动判断）</div>
+        <div class="pn" id="phase-name"></div>
+        <p class="why" id="phase-why"></p>
+      </div>
+      <div>
+        <div class="ph" style="margin-bottom:6px">示例仓位（占科技主题资金的比例）</div>
+        <div class="stack" id="phase-stack" role="img" aria-label="示例仓位分配"></div>
+        <div class="leg" id="phase-leg"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" aria-label="K线">
+    <div class="ctrl">
+      <div class="seg" role="group" aria-label="指数"><button id="ix-s" aria-pressed="true">科创50</button><button id="ix-h" aria-pressed="false">恒生科技</button></div>
+      <div class="seg" role="group" aria-label="时间范围"><button id="rg-3" aria-pressed="true">近期</button><button id="rg-12" aria-pressed="false">一年</button><button id="rg-all" aria-pressed="false">两年</button></div>
+    </div>
+    <div id="kc" role="img" aria-label="指数日K线、最可能路径、信号线和节点"></div>
+    <div class="kleg">
+      <span><i class="sol"></i>实心K线：完整行情</span>
+      <span><i class="hol"></i>空心K线：只有收盘价</span>
+      <span><i class="dl"></i>最可能路径</span>
+      <span><i class="hl"></i>乐观线 / 支撑 / 悲观线</span>
+      <span>▲ 超卖　▼ 超买</span>
+    </div>
+    <div id="det" role="status" aria-live="polite"></div>
+  </section>
+
+  <section aria-label="节点">
+    <div class="sh"><h2>节点操作手册</h2><span class="muted">蓝框为关键节点，黄框为三天内到来的节点</span></div>
+    <div class="nodes" id="nodes"></div>
+  </section>
+
+  <section class="panel" aria-label="调仓路线">
+    <div class="sh"><h2>调仓路线图</h2><span class="muted">按触发条件切换，不按日期机械执行</span></div>
+    <div class="route" id="route"></div>
+  </section>
+
+  <div class="two">
+    <section class="panel" aria-label="提醒规则">
+      <div class="sh"><h2>自动提醒规则</h2><span class="muted">按最新数据判断</span></div>
+      <div class="rules" id="rules"></div>
+    </section>
+    <section class="panel" aria-label="最新消息">
+      <div class="sh"><h2>最新消息</h2><span class="muted">接入后每个工作日自动抓取</span></div>
+      <div class="news" id="news"></div>
+    </section>
+  </div>
+
+  <p class="foot">示例仓位和操作只是根据个人推演整理的规则化框架，不针对任何人的具体情况，不构成投资建议。请按自己的风险承受能力调整比例。</p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
+<script>
+const DATA={
+ asof:'2026-10-30',
+ s:{name:'科创50',base:1228.09,
+  bars:[
+   ['2026-08-31',null,null,null,1684.39,1],['2026-09-01',null,null,null,1647.53,1],['2026-09-02',null,null,null,1617.60,1],['2026-09-03',null,null,null,1611.17,1],['2026-09-04',null,null,null,1577.36,1],['2026-09-07',null,null,null,1615.53,1],['2026-09-08',null,null,null,1591.00,1],['2026-09-09',null,null,null,1580.06,1],['2026-09-10',null,null,null,1569.22,1],
+   ['2026-09-11',1548.70,1556.68,1516.20,1553.39,0],['2026-09-14',1526.80,1542.25,1516.52,1528.27,0],['2026-09-15',1524.27,1578.43,1524.27,1551.96,0],['2026-09-16',1558.38,1622.35,1552.24,1616.19,0],['2026-09-17',1607.85,1631.02,1598.96,1606.29,0],['2026-09-18',1634.63,1671.01,1630.10,1652.63,0],['2026-09-21',1669.20,1678.59,1643.17,1657.48,0],['2026-09-22',1699.05,1707.67,1657.22,1665.04,0],['2026-09-23',1671.77,1676.85,1656.98,1660.85,0],['2026-09-24',1652.69,1653.39,1621.87,1621.87,0],['2026-09-28',1610.92,1610.92,1548.95,1555.98,0],['2026-09-29',1558.66,1576.55,1548.74,1569.34,0],['2026-09-30',1576.51,1578.96,1526.79,1530.01,0],['2026-10-08',1512.79,1521.46,1446.43,1456.32,0],['2026-10-09',1441.72,1466.88,1389.99,1457.27,0],['2026-10-12',1443.81,1473.44,1425.31,1426.72,0],['2026-10-13',1389.53,1447.19,1375.33,1427.18,0],['2026-10-14',1419.46,1429.38,1378.01,1380.26,0],['2026-10-15',1326.24,1367.34,1326.24,1359.52,0],['2026-10-16',1381.93,1389.43,1341.21,1358.65,0],
+   ['2026-10-19',null,null,null,1329.19,1],['2026-10-20',null,null,null,1342.42,1],['2026-10-21',null,null,null,1343.28,1],['2026-10-22',null,null,null,1305.87,1],['2026-10-23',null,null,null,1345.50,2],['2026-10-26',null,null,null,1315.50,1],['2026-10-27',null,null,null,1252.28,1],['2026-10-28',null,null,null,1282.93,2],['2026-10-29',null,null,null,1228.09,1],['2026-10-30',null,null,null,1160.79,2]],
+  path:[1228.09,1340,1130,1100,1140,1200,1250,1310,1360,1395,1430,1465,1495,1530,1560,1600,1620,1580,1545,1565,1610,1660,1700,1740,1780],
+  lines:[{p:1460,t:'乐观线',k:'good'},{p:1330,t:'反弹减仓线',k:'warn'},{p:1150,t:'支撑',k:'neu'},{p:1050,t:'悲观线',k:'bad'}],
+  bias:10},
+ h:{name:'恒生科技',base:3744.14,
+  bars:[
+   ['2026-09-28',4324.48,4348.99,4275.31,4296.00,0],['2026-09-29',4286.90,4286.90,4217.81,4249.62,0],['2026-09-30',4232.24,4258.22,4216.34,4253.89,0],['2026-10-02',4176.92,4176.92,4111.32,4157.94,0],['2026-10-05',4138.38,4184.58,4122.09,4183.68,0],['2026-10-06',4226.38,4251.54,4205.06,4223.08,0],['2026-10-07',4209.14,4222.43,4156.56,4194.49,0],['2026-10-08',4183.83,4215.35,4065.18,4073.38,0],['2026-10-09',4085.19,4197.84,4085.19,4197.84,0],['2026-10-12',4241.07,4241.07,4157.41,4169.57,0],['2026-10-13',4129.66,4138.20,4050.90,4136.63,0],['2026-10-14',4135.90,4243.65,4097.79,4174.47,0],['2026-10-15',4082.06,4103.99,4042.05,4060.99,0],['2026-10-16',4125.44,4160.04,4091.06,4108.24,0],['2026-10-20',4055.52,4083.66,4026.90,4045.91,0],['2026-10-21',4110.74,4110.74,3985.63,3994.77,0],['2026-10-22',3949.02,3949.02,3781.15,3793.93,0],['2026-10-23',3813.43,3896.93,3781.23,3871.66,0],['2026-10-26',3864.89,3864.89,3814.64,3823.73,0],
+   ['2026-10-27',null,null,null,3800.43,2],['2026-10-28',null,null,null,3853.72,1],['2026-10-29',null,null,null,3744.14,1]],
+  path:[3744.14,3960,3530,3500,3650,3830,3920,4030,4140,4230,4310,4400,4480,4560,4640,4730,4780,4740,4710,4790,4880,4960,5030,5080,5130],
+  lines:[{p:4250,t:'乐观线',k:'good'},{p:3950,t:'反弹减仓线',k:'warn'},{p:3500,t:'支撑',k:'neu'},{p:3300,t:'悲观线',k:'bad'}],
+  bias:7},
+ macro:{brent:'112–116',coreCpi:2.6,coreSvcMoM:0.4,hikeProb:85},
+ news:[
+  {d:'10/30',t:'科创50收跌5.48%，创业板跌4.13%',m:'CPO、PCB大跌，白酒、航运走强。实盘已比最可能路径低约6个百分点。'},
+  {d:'10/30',t:'布伦特原油约116美元，10月累计涨约11%',m:'霍尔木兹海峡油轮事件，伊朗未回应美方谈判信。对通胀和加息不利。'},
+  {d:'10/29',t:'英特尔三季度超预期，四季度指引偏弱，盘后跌约21%',m:'数据中心营收同比近+80%；存储涨价压低PC需求，预计今年PC销量−12%。'},
+  {d:'10/28',t:'谷歌云营收+103%，2027年资本开支将大幅增加',m:'自由现金流转负，盘后跌超11%。对算力需求是利好。'},
+  {d:'10/28',t:'美联储维持3.75%–4.00%，两票主张加息',m:'12月加息概率约85%。'}]
+};
+const PLANS={
+ P0:{name:'空窗期 · 超跌观察',why:'两个指数都在超卖区，但12月加息前仍有二次探底风险。轻仓，留足现金等更好的位置。',w:{hs:25,rb:10,ai:10,ce:0,cash:55}},
+ P1:{name:'11月反弹 · 逢高减AI',why:'反弹是卖出算力硬件的机会，不是追高的时机。恒生科技保持不动。',w:{hs:25,rb:10,ai:5,ce:0,cash:60}},
+ P2:{name:'二次探底 · 分批买入',why:'科创50到1000–1150、恒科到3400–3600时分批加仓，优先恒生科技和机器人。',w:{hs:40,rb:15,ai:10,ce:0,cash:35}},
+ P3:{name:'底部确认 · 加回AI',why:'巨头确认2027年资本开支继续增加后，加回人工智能，降低现金。',w:{hs:40,rb:15,ai:20,ce:0,cash:25}},
+ PX:{name:'悲观触发 · 防守',why:'科创50跌破1050，或巨头下调资本开支，或核心通胀连续两月高于3%。清掉算力硬件，保留低估值的恒生科技底仓。',w:{hs:25,rb:5,ai:0,ce:0,cash:70}}
+};
+const ETF={hs:['恒生科技','--c-hs'],rb:['机器人ETF','--c-rb'],ai:['人工智能ETF','--c-ai'],ce:['消费电子ETF','--c-ce'],cash:['现金/红利','--c-cash']};
+const NODES=[
+ {d:'2026-11-03',lab:'11/03',t:'美国中期选举',watch:'结果是否引发美股剧烈波动。',br:[
+   {i:'结果平稳',p:'影响小',a:[['hold','全部','维持当前仓位']]},
+   {i:'纳指单日跌超3%',p:'A股、港股科技跟跌2%–4%',a:[['hold','全部','不动，等英伟达财报'],['add','恒生科技','若跌到3500附近，可先买计划的一半']]}]},
+ {d:'2026-11-12',lab:'11/12前后',t:'美国10月CPI',watch:'<b>核心CPI</b>是否继续上升；日期以美国劳工统计局公布为准。',br:[
+   {i:'核心CPI回落到2.5%以下',p:'加息预期降温，科技股+2%–4%',a:[['hold','全部','维持，提高乐观情形权重']]},
+   {i:'核心CPI 2.6%–3.0%',p:'影响有限',a:[['hold','全部','维持']]},
+   {i:'核心CPI高于3%',p:'科技股−3%–6%，二次探底提前',a:[['cut','人工智能ETF','减到5%'],['hold','恒生科技','不动']]}]},
+ {d:'2026-11-18',lab:'11/18前后',key:true,t:'英伟达财报',watch:'营收与<b>1080亿美元±2%</b>的指引相比，以及下季度指引和数据中心增速。',br:[
+   {i:'超预期且上调指引',p:'科创50 +8%–12%，月底1330–1380',a:[['cut','人工智能ETF','反弹到1330上方时减半（10%→5%）'],['hold','恒生科技','不动']]},
+   {i:'只是达标，指引平淡',p:'科创50在1150–1220徘徊',a:[['hold','全部','不动，等12月']]},
+   {i:'不及预期',p:'科创50跌破1150，看1100',a:[['hold','全部','不加仓'],['stop','人工智能ETF','若收盘跌破1050，按悲观触发清仓']]}]},
+ {d:'2026-11-20',lab:'11月中下旬',t:'腾讯、阿里、美团三季报',watch:'AI收入或云业务增速、价格战是否缓和、利润率。',br:[
+   {i:'AI单独贡献收入，利润改善',p:'恒生科技+5%–8%，到3950–4100',a:[['hold','恒生科技','持有；回调到3700以下可加到30%']]},
+   {i:'价格战加剧，利润下滑',p:'恒生科技回落到3500附近',a:[['hold','恒生科技','不急着加，等12月一起加']]}]},
+ {d:'2026-12-09',lab:'12/09',key:true,t:'美联储议息',watch:'是否加息，以及措辞是否暗示继续加。',br:[
+   {i:'加息，并暗示还要再加',p:'再跌8%–12%，进入二次探底区',a:[['add','恒生科技','3400–3600分批加到40%'],['add','机器人ETF','加到15%'],['add','人工智能ETF','科创50在1000–1150时加回10%']]},
+   {i:'加息，但暗示是最后一次',p:'跌3%–5%后企稳',a:[['add','恒生科技、机器人','先执行二次探底计划的一半']]},
+   {i:'不加息',p:'科技股+5%–8%',a:[['add','全部','按乐观触发线执行：站上乐观线直接切到底部确认仓位']]}]},
+ {d:'2026-12-15',lab:'12月中旬',t:'中央经济工作会议',watch:'消费刺激力度、平台经济和科技自主的政策。',br:[
+   {i:'消费和平台政策超预期',p:'恒生科技领涨',a:[['add','恒生科技','提前加到40%']]},
+   {i:'符合预期',p:'影响小',a:[['hold','全部','维持']]}]},
+ {d:'2027-02-05',lab:'27年1–2月',key:true,t:'美国巨头四季报：2027年资本开支',watch:'四巨头合计能否兑现<b>超1万亿美元</b>，有没有人下调。',br:[
+   {i:'继续增加或上调',p:'筑底确认，开始慢涨',a:[['add','人工智能ETF','加到20%'],['cut','现金','降到25%']]},
+   {i:'有一家明显下调',p:'悲观情形成立，再跌10%以上',a:[['stop','人工智能ETF','清仓'],['cut','机器人ETF','减到5%'],['hold','恒生科技','保留25%底仓']]}]},
+ {d:'2027-03-08',lab:'27年3月',t:'全国两会',watch:'科技、消费相关政策预期。',br:[
+   {i:'政策超预期',p:'A股、港股科技+5%左右',a:[['hold','全部','维持，不追高']]},
+   {i:'符合预期',p:'影响小',a:[['hold','全部','维持']]}]},
+ {d:'2027-06-16',lab:'27年二–三季度',t:'美联储加息周期见顶（预计）',watch:'是否明确停止加息；油价是否回落到100美元以下。',br:[
+   {i:'明确停止加息',p:'估值修复，进入新一轮上涨',a:[['cut','现金','可降到15%，按个人风险偏好']]},
+   {i:'继续加息',p:'估值继续承压',a:[['hold','全部','维持较高现金']]}]}
+];
+
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const DAY=864e5;
+const toD=s=>Date.parse(s+'T00:00:00Z');
+const fmtD=t=>new Date(t).toISOString().slice(0,10);
+const today=(()=>{const t=new Date(Date.now()+8*36e5).toISOString().slice(0,10);return t})();
+const fmt=v=>(v>0?'+':v<0?'−':'')+Math.abs(v).toFixed(1)+'%';
+const cnDate=s=>{const [y,m,d]=s.split('-');return y+'年'+(+m)+'月'+(+d)+'日'};
+
+function fullBars(k){const out=[];let prev=null;DATA[k].bars.forEach(([d,o,h,l,c,f])=>{if(f){const op=prev??c;out.push({time:d,open:op,high:Math.max(op,c),low:Math.min(op,c),close:c,flag:f})}else out.push({time:d,open:o,high:h,low:l,close:c,flag:0});prev=c});return out}
+function indicators(k){const b=fullBars(k),c=b.map(x=>x.close);let ag=0,al=0;return b.map((x,i)=>{let rsi=null,bias=null;if(i>=1){const g=Math.max(c[i]-c[i-1],0),l=Math.max(c[i-1]-c[i],0);if(i<=14){ag+=g/14;al+=l/14}else{ag=(ag*13+g)/14;al=(al*13+l)/14}}if(i>=14)rsi=al===0?100:100-100/(1+ag/al);if(i>=19){const ma=c.slice(i-19,i+1).reduce((a,v)=>a+v,0)/20;bias=(c[i]/ma-1)*100}let st=0;if((rsi!==null&&rsi<30)||(bias!==null&&bias<-DATA[k].bias))st=-1;else if((rsi!==null&&rsi>70)||(bias!==null&&bias>DATA[k].bias))st=1;return{...x,rsi,bias,st}})}
+function pathSeries(k){const P=DATA[k].path;const anchors=P.map((v,i)=>({t:i===0?toD('2026-10-29'):Date.UTC(2026,9+i,28),v}));const out=[];for(let i=1;i<anchors.length;i++){const a=anchors[i-1],b=anchors[i];for(let t=(i===1?a.t:a.t+DAY);t<=b.t;t+=DAY){const wd=new Date(t).getUTCDay();if(wd===0||wd===6)continue;const r=(t-a.t)/(b.t-a.t);const v=a.v+(b.v-a.v)*(1-Math.cos(Math.PI*r))/2;out.push({time:fmtD(t),value:Math.round(v*100)/100})}}return out}
+function pathAt(k,d){const s=pathSeries(k);const t=toD(d);let best=s[0];for(const p of s){if(toD(p.time)<=t)best=p;else break}return best.value}
+
+const IND={s:indicators('s'),h:indicators('h')};
+const last=k=>IND[k][IND[k].length-1];
+
+function triggered(){const ls=last('s'),lh=last('h');return{
+ sOpt:IND.s.some(x=>x.time>'2026-10-29'&&x.time<='2026-12-31'&&x.close>=1460),hOpt:IND.h.some(x=>x.time>'2026-10-29'&&x.time<='2026-12-31'&&x.close>=4250),
+ sPes:ls.close<=1050,hPes:lh.close<=3300,sReb:ls.close>=1330,hReb:lh.close>=3950,
+ sDip:ls.close<=1150,hDip:lh.close<=3600}}
+function currentPhase(){const tr=triggered();if(tr.sPes||tr.hPes)return['PX','科创50或恒科跌破悲观线'];if(tr.sOpt||tr.hOpt)return['P3','12月前站上乐观线，按乐观情形执行'];if(today>='2027-02-10')return['P3','已过巨头资本开支指引窗口（需确认结果）'];if(today>='2026-12-09'&&(tr.sDip||tr.hDip))return['P2','美联储会议后进入二次探底区'];if(tr.sReb||tr.hReb)return['P1','反弹到减仓线上方'];return['P0','12月加息前，指数在超卖区但未到二次探底区']}
+
+function renderPhase(){const [id,why]=currentPhase();const p=PLANS[id];document.getElementById('phase-name').textContent=p.name;document.getElementById('phase-why').textContent=p.why+'（判断依据：'+why+'）';
+ const st=document.getElementById('phase-stack');st.innerHTML='';const lg=document.getElementById('phase-leg');lg.innerHTML='';
+ Object.entries(p.w).forEach(([k,v])=>{if(v>0){const i=document.createElement('i');i.style.flex=v;i.style.background='var('+ETF[k][1]+')';i.textContent=v>=8?v+'%':'';if(k==='cash')i.className='cash';st.appendChild(i)}const s=document.createElement('span');s.innerHTML='<i class="sw" style="background:var('+ETF[k][1]+')"></i>'+ETF[k][0]+' <b class="num" style="font-weight:500">'+v+'%</b>';lg.appendChild(s)})}
+
+function daysTo(d){return Math.round((toD(d)-toD(today))/DAY)}
+function renderAlerts(){const box=document.getElementById('alerts');box.innerHTML='';const add=(cls,tag,html)=>{const d=document.createElement('div');d.className='al '+cls;d.innerHTML='<span class="tg">'+tag+'</span><div>'+html+'</div>';box.appendChild(d)};
+ const next=NODES.find(n=>daysTo(n.d)>=0);if(next){const dd=daysTo(next.d);add(dd<=3?'warn':'info',dd===0?'今天':dd<=3?'即将到来':'下一个节点',(dd===0?'今天':dd+'天后')+'：<b>'+next.t+'</b>（'+next.lab+'）。看：'+next.watch.replace(/<[^>]+>/g,''))}
+ const ls=last('s'),lh=last('h');const tr=triggered();
+ if(tr.sPes||tr.hPes)add('bad','悲观触发','指数跌破悲观线，按防守仓位执行。');
+ if(tr.sOpt||tr.hOpt)add('good','乐观触发','12月前站上乐观线，二次探底大概率不会出现。');
+ if(!tr.sPes){const gap=(ls.close/1150-1)*100;if(gap<3)add('warn','接近支撑','科创50 '+ls.close.toFixed(2)+'，距1150支撑仅'+gap.toFixed(1)+'%；距悲观线1050还有'+((ls.close/1050-1)*100).toFixed(1)+'%。')}
+ const os=[];if(ls.st<0)os.push('科创50 RSI '+ls.rsi.toFixed(0));if(lh.st<0)os.push('恒科 RSI '+lh.rsi.toFixed(0));if(os.length)add('good','超卖',os.join('，')+'。短期容易反弹，但12月前仍可能二次探底，不急着重仓。');
+ const dv=(ls.close/pathAt('s',ls.time)-1)*100;if(Math.abs(dv)>=4)add('warn','偏离推演','科创50实盘比最可能路径'+(dv<0?'低':'高')+Math.abs(dv).toFixed(1)+'%。'+(dv<0?'若下周收盘跌破1100，推演将下调。':''))}
+
+let IX='s',RG='3',chart,cs,ls_,pl=[];
+function themeColors(){return{bg:css('--panel'),ink:css('--ink-2'),ink3:css('--ink-3'),grid:css('--grid'),rule:css('--rule'),up:css('--up'),down:css('--down'),fc:css('--fc'),good:css('--good'),warn:css('--warn'),bad:css('--bad'),os:css('--os'),ob:css('--ob'),accent:css('--accent')}}
+function buildChart(){const el=document.getElementById('kc');if(!window.LightweightCharts){el.innerHTML='<p class="muted" style="padding:20px">K线图组件没有加载成功，请检查网络后刷新。</p>';return}
+ const c=themeColors();if(chart){chart.remove();chart=null}
+ chart=LightweightCharts.createChart(el,{autoSize:true,layout:{background:{type:'solid',color:c.bg},textColor:c.ink3,fontFamily:'"IBM Plex Mono",monospace',fontSize:11},grid:{vertLines:{visible:false},horzLines:{color:c.grid}},rightPriceScale:{borderColor:c.rule,scaleMargins:{top:0.12,bottom:0.08}},timeScale:{borderColor:c.rule,rightOffset:2,fixLeftEdge:false},crosshair:{mode:0},localization:{locale:'zh-CN',dateFormat:'yyyy-MM-dd'},handleScroll:{vertTouchDrag:false},handleScale:{axisPressedMouseMove:false}});
+ cs=chart.addCandlestickSeries({upColor:c.up,downColor:c.down,borderUpColor:c.up,borderDownColor:c.down,wickUpColor:c.up,wickDownColor:c.down,priceLineVisible:false,priceFormat:{type:'price',precision:0,minMove:1}});
+ const bars=IND[IX].map(b=>{const up=b.close>=b.open;const col=up?c.up:c.down;return b.flag?{time:b.time,open:b.open,high:b.high,low:b.low,close:b.close,color:'rgba(0,0,0,0)',borderColor:col,wickColor:col}:{time:b.time,open:b.open,high:b.high,low:b.low,close:b.close}});
+ cs.setData(bars);
+ ls_=chart.addLineSeries({color:c.fc,lineWidth:2,lineStyle:LightweightCharts.LineStyle.Dashed,priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false});
+ ls_.setData(pathSeries(IX));
+ DATA[IX].lines.forEach(L=>{cs.createPriceLine({price:L.p,color:L.k==='good'?c.good:L.k==='bad'?c.bad:L.k==='warn'?c.warn:c.ink3,lineWidth:1,lineStyle:LightweightCharts.LineStyle.Dashed,axisLabelVisible:true,title:L.t})});
+ const ps=pathSeries(IX).map(p=>p.time);const nm=NODES.map((n,i)=>({n,i})).filter(o=>ps.includes(o.n.d)).map(o=>({time:o.n.d,position:'aboveBar',color:o.n.key?c.accent:c.ink3,shape:'circle',text:String(o.i+1)}));ls_.setMarkers(nm);
+ const sm=[];let prev=0;IND[IX].forEach(b=>{if(b.time<'2026-09-20'){prev=b.st;return}if(b.st&&b.st!==prev)sm.push({time:b.time,position:b.st<0?'belowBar':'aboveBar',color:b.st<0?c.os:c.ob,shape:b.st<0?'arrowUp':'arrowDown',text:b.st<0?'超卖':'超买'});prev=b.st});cs.setMarkers(sm);
+ setRange();
+ chart.subscribeCrosshairMove(p=>{if(!p||!p.time){showDet(IND[IX][IND[IX].length-1].time);return}const t=typeof p.time==='string'?p.time:(p.time.year+'-'+String(p.time.month).padStart(2,'0')+'-'+String(p.time.day).padStart(2,'0'));showDet(t)});
+ showDet(IND[IX][IND[IX].length-1].time)}
+function setRange(){if(!chart)return;const ts=chart.timeScale();if(RG==='3')ts.setVisibleRange({from:matchMedia('(max-width:720px)').matches?'2026-10-08':(IX==='s'?'2026-09-11':'2026-09-28'),to:'2027-02-12'});else if(RG==='12')ts.setVisibleRange({from:'2026-09-01',to:'2027-10-29'});else ts.fitContent()}
+function showDet(t){const k=IX;const b=IND[k].find(x=>x.time===t);const f=pathAt(k,t);let h='<h3>'+cnDate(t)+(b?'':'（推演）')+'</h3><div class="g">';
+ if(b){if(!b.flag){h+='<div><span>开盘</span><span>'+b.open.toFixed(2)+'</span></div><div><span>最高</span><span>'+b.high.toFixed(2)+'</span></div><div><span>最低</span><span>'+b.low.toFixed(2)+'</span></div>'}
+  h+='<div><span>收盘'+(b.flag===2?'（推算）':'')+'</span><span>'+b.close.toFixed(2)+'</span></div><div><span>较起点</span><span>'+fmt((b.close/DATA[k].base-1)*100)+'</span></div><div><span>最可能</span><span>'+f.toFixed(0)+'</span></div><div><span>偏离推演</span><span>'+fmt((b.close/f-1)*100)+'</span></div>';
+  if(b.rsi!==null)h+='<div><span>RSI</span><span>'+b.rsi.toFixed(1)+'</span></div>';if(b.bias!==null)h+='<div><span>偏离20日线</span><span>'+fmt(b.bias)+'</span></div>';
+  if(b.st)h+='<div><span>信号</span><span style="color:var('+(b.st<0?'--os':'--ob')+')">'+(b.st<0?'超卖':'超买')+'</span></div>'}
+ else{h+='<div><span>最可能</span><span>'+f.toFixed(0)+'</span></div><div><span>较起点</span><span>'+fmt((f/DATA[k].base-1)*100)+'</span></div>'}
+ h+='</div>';NODES.forEach((n,i)=>{if(Math.abs(toD(n.d)-toD(t))<=5*DAY)h+='<div class="ev"><b style="font-weight:500;color:var(--ink)">节点'+(i+1)+'：'+n.t+'</b>（'+n.lab+'）<br>'+n.watch+'</div>'});
+ document.getElementById('det').innerHTML=h}
+
+function renderNodes(){const box=document.getElementById('nodes');box.innerHTML='';const lab={add:'加仓',cut:'减仓',hold:'持有',stop:'止损'};
+ NODES.forEach((n,i)=>{const dd=daysTo(n.d);const soon=dd>=0&&dd<=3;const past=dd<0;const el=document.createElement('article');el.className='nd'+(n.key?' key':'')+(soon?' soon':'')+(past?' past':'');el.id='node-'+(i+1);
+  let h='<div class="nh"><span class="no">'+(i+1)+'</span><span class="dt">'+n.lab+'</span><h3>'+n.t+'</h3>'+(n.key?'<span class="kk">关键</span>':'')+'<span class="cd'+(soon?' soon':'')+'">'+(past?'已过':dd===0?'今天':dd+'天后')+'</span></div>';
+  h+='<p class="watch"><b>看什么：</b>'+n.watch+'</p><div class="br"><div class="brr hd"><span>出现的信号</span><span>股价可能</span><span>操作</span></div>';
+  n.br.forEach(b=>{h+='<div class="brr"><div class="if">'+b.i+'</div><div class="px">'+b.p+'</div><div class="acts">'+b.a.map(a=>'<div class="act"><i class="'+a[0]+'">'+lab[a[0]]+'</i><span><b>'+a[1]+'</b> '+a[2]+'</span></div>').join('')+'</div></div>'});
+  h+='</div>';el.innerHTML=h;box.appendChild(el)})}
+
+function renderRoute(){const box=document.getElementById('route');box.innerHTML='';const cur=currentPhase()[0];
+ const rows=[['P0','现在','指数超卖，但12月前仍可能二次探底'],['P1','11月反弹','科创50≥1330 或 恒科≥3950'],['P2','二次探底','12月后科创50在1000–1150 / 恒科在3400–3600'],['P3','底部确认','巨头2027年资本开支继续增加；或12月前站上乐观线'],['PX','悲观触发','科创50≤1050 / 恒科≤3300 / 巨头下调 / 核心CPI连续两月>3%']];
+ rows.forEach(([id,t,cond])=>{const p=PLANS[id];const el=document.createElement('div');el.className='rt'+(id===cur?' now':'');let st='<div class="stack" role="img" aria-label="'+t+'示例仓位">';Object.entries(p.w).forEach(([k,v])=>{if(v>0)st+='<i style="flex:'+v+';background:var('+ETF[k][1]+')"'+(k==='cash'?' class="cash"':'')+'>'+(v>=8?v+'%':'')+'</i>'});st+='</div>';
+  el.innerHTML='<div><h3>'+t+'</h3><p>'+cond+'</p></div><div>'+st+'</div>';box.appendChild(el)});
+ const lg=document.createElement('div');lg.className='leg';lg.innerHTML=Object.values(ETF).map(([n,c])=>'<span><i class="sw" style="background:var('+c+')"></i>'+n+'</span>').join('')+'<span style="color:var(--ink-3)">消费电子ETF在所有阶段都是0%</span>';box.appendChild(lg)}
+
+function renderRules(){const box=document.getElementById('rules');box.innerHTML='';const ls=last('s'),lh=last('h'),M=DATA.macro;
+ const R=[];const near=(v,th,dir)=>{const g=dir<0?(v/th-1)*100:(th/v-1)*100;return g<=0?'on':g<3?'near':'off'};
+ const next=NODES.find(n=>daysTo(n.d)>=0);R.push(['节点前一天提醒',next?next.lab+' '+next.t:'—',next&&daysTo(next.d)<=1?'on':'off',next?daysTo(next.d)+'天后':'']);
+ [[ls.close,1460,1,'科创50 ≥ 1460 乐观线'],[ls.close,1330,1,'科创50 ≥ 1330 减仓线'],[ls.close,1150,-1,'科创50 ≤ 1150 支撑'],[ls.close,1050,-1,'科创50 ≤ 1050 悲观线'],[lh.close,4250,1,'恒科 ≥ 4250 乐观线'],[lh.close,3950,1,'恒科 ≥ 3950 减仓线'],[lh.close,3500,-1,'恒科 ≤ 3500 支撑'],[lh.close,3300,-1,'恒科 ≤ 3300 悲观线']].forEach(([v,th,dir,n])=>{const st=near(v,th,dir);R.push([n,v.toFixed(0),st,st==='on'?'已触发':st==='near'?'接近':'未触发'])});
+ R.push(['RSI < 30 超卖','科创50 '+ls.rsi.toFixed(0)+' · 恒科 '+lh.rsi.toFixed(0),(ls.rsi<30||lh.rsi<30)?'ok':'off',(ls.rsi<30||lh.rsi<30)?'已触发':'未触发']);
+ R.push(['布伦特 > 120 或 < 100',M.brent+'美元','off','未触发']);
+ R.push(['核心CPI 连续两月 > 3%',M.coreCpi+'%','off','未触发']);
+ R.push(['美联储12月加息概率',M.hikeProb+'%','near','偏高']);
+ R.forEach(([n,v,st,s])=>{const d=document.createElement('div');d.className='ru';d.innerHTML='<span class="lt '+st+'"></span><span>'+n+'</span><span class="v">'+v+'</span><span class="s '+(st==='on'?'on':st==='near'?'near':'')+'">'+s+'</span>';box.appendChild(d)})}
+function renderNews(){const box=document.getElementById('news');box.innerHTML='';DATA.news.forEach(n=>{const d=document.createElement('div');d.className='nw';d.innerHTML='<span class="d">'+n.d+'</span><div><b>'+n.t+'</b><div class="im">'+n.m+'</div></div>';box.appendChild(d)})}
+
+function setBtns(){[['ix-s','s'],['ix-h','h']].forEach(([id,v])=>document.getElementById(id).setAttribute('aria-pressed',IX===v));[['rg-3','3'],['rg-12','12'],['rg-all','all']].forEach(([id,v])=>document.getElementById(id).setAttribute('aria-pressed',RG===v))}
+document.getElementById('ix-s').onclick=()=>{IX='s';setBtns();buildChart()};
+document.getElementById('ix-h').onclick=()=>{IX='h';setBtns();buildChart()};
+document.getElementById('rg-3').onclick=()=>{RG='3';setBtns();setRange()};
+document.getElementById('rg-12').onclick=()=>{RG='12';setBtns();setRange()};
+document.getElementById('rg-all').onclick=()=>{RG='all';setBtns();setRange()};
+matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',buildChart);
+new MutationObserver(buildChart).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+
+renderAlerts();renderPhase();renderNodes();renderRoute();renderRules();renderNews();buildChart();
+</script>
+
+</body>
+</html>
