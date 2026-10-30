@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f5f6f8">
+<title>AI行情驱动地图</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@700&family=Noto+Sans+SC:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0}
+/* Layout: a single scrolling briefing. Thesis → narrative phase bar → driver cards → impact matrix → catalyst timeline → scenarios → signal lights → ETF stances. */
+:root{
+  --bg:#f5f6f8;--panel:#ffffff;--ink:#14171c;--ink-2:#4a515c;--ink-3:#868d98;--rule:#e2e5ea;--chip:#eef1f6;
+  --accent:#2563c9;--accent-bg:#e7effb;
+  --bad:#c23b32;--bad-bg:#fbe8e6;--warn:#b7791f;--warn-bg:#fbf0dc;--good:#1f8a52;--good-bg:#e3f4ea;
+  --h1:#e7effb;--h2:#b9cff2;--h3:#7aa3e3;--h3-ink:#0d2a57;
+  --f-display:"Noto Serif SC","Songti SC",serif;--f-body:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;--f-num:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#111418;--panel:#181c22;--ink:#e9ecf1;--ink-2:#b3bac5;--ink-3:#7d8591;--rule:#2a3039;--chip:#222833;
+  --accent:#5b93ec;--accent-bg:#1a2a44;
+  --bad:#ef6b62;--bad-bg:#3a1c1a;--warn:#e3a54a;--warn-bg:#3a2c14;--good:#43b97a;--good-bg:#14301f;
+  --h1:#1a2a44;--h2:#24426e;--h3:#3a69b0;--h3-ink:#eaf1fd;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111418;--panel:#181c22;--ink:#e9ecf1;--ink-2:#b3bac5;--ink-3:#7d8591;--rule:#2a3039;--chip:#222833;
+  --accent:#5b93ec;--accent-bg:#1a2a44;
+  --bad:#ef6b62;--bad-bg:#3a1c1a;--warn:#e3a54a;--warn-bg:#3a2c14;--good:#43b97a;--good-bg:#14301f;
+  --h1:#1a2a44;--h2:#24426e;--h3:#3a69b0;--h3-ink:#eaf1fd;color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.65;-webkit-text-size-adjust:100%}
+.wrap{max-width:1000px;margin:0 auto;padding-block:28px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:22px}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(24px,4.4vw,34px);line-height:1.3;margin:0;text-wrap:balance}
+h2{font-size:17px;font-weight:500;margin:0;text-wrap:balance}
+p{margin:0}
+.num{font-family:var(--f-num);font-variant-numeric:tabular-nums}
+.muted{color:var(--ink-3);font-size:12.5px}
+.lede{color:var(--ink-2);font-size:15px;max-width:62ch;margin-top:8px}
+.stamp{display:inline-block;margin-top:10px;font-size:12px;color:var(--ink-3)}
+nav{display:flex;flex-wrap:wrap;gap:6px}
+nav a{font-size:13px;color:var(--ink-2);text-decoration:none;padding:5px 11px;border-radius:999px;background:var(--chip)}
+nav a:focus-visible,nav a:hover{color:var(--ink);outline:2px solid var(--accent);outline-offset:1px}
+section{display:flex;flex-direction:column;gap:12px;scroll-margin-top:12px}
+.sh{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 12px}
+.panel{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:16px}
+.thesis{background:var(--accent-bg);border-radius:10px;padding:16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.thesis div{min-width:0}
+.thesis b{display:block;font-weight:500;font-size:15px;color:var(--ink)}
+.thesis span{font-size:13.5px;color:var(--ink-2)}
+.phases{display:grid;grid-template-columns:1.25fr 1fr 1.25fr;gap:4px;position:relative}
+.ph{padding:12px;border-radius:8px;background:var(--chip);min-width:0}
+.ph.now{background:var(--warn-bg);box-shadow:inset 0 0 0 1.5px var(--warn)}
+.ph .t{font-size:12px;color:var(--ink-3)}
+.ph b{display:block;font-weight:500;font-size:15px;margin:2px 0}
+.ph p{font-size:13px;color:var(--ink-2)}
+.ph .tag{display:inline-block;margin-top:6px;font-size:11.5px;font-weight:500;color:var(--warn)}
+.drivers{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px}
+.dc{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:14px 14px 12px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.dc .top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.dc h3{margin:0;font-size:15px;font-weight:500}
+.dc .read{font-family:var(--f-num);font-size:14px;color:var(--ink)}
+.dc .why{font-size:13px;color:var(--ink-2)}
+.dc .th{font-size:12.5px;color:var(--ink-3);border-top:1px dashed var(--rule);padding-top:7px}
+.dc .th b{font-weight:500;color:var(--ink-2)}
+.pill{font-size:12px;font-weight:500;padding:2px 9px;border-radius:999px;white-space:nowrap}
+.bad{background:var(--bad-bg);color:var(--bad)}.warn{background:var(--warn-bg);color:var(--warn)}.good{background:var(--good-bg);color:var(--good)}.neu{background:var(--chip);color:var(--ink-2)}
+.mx{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:separate;border-spacing:3px;width:100%;min-width:560px;font-size:13px}
+th{font-weight:500;color:var(--ink-2);text-align:left;padding:6px 8px;font-size:12.5px}
+th.c{text-align:center}
+td{padding:8px;border-radius:6px;vertical-align:middle}
+td.rn{color:var(--ink);background:transparent;font-weight:500;white-space:nowrap}
+td.rn small{display:block;font-weight:400;color:var(--ink-3);font-size:11.5px;white-space:normal}
+td.s{text-align:center;color:var(--ink-2);font-size:12.5px}
+td.s1{background:var(--h1)}td.s2{background:var(--h2);color:var(--ink)}td.s3{background:var(--h3);color:var(--h3-ink);font-weight:500}
+.mxleg{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--ink-3);align-items:center}
+.mxleg i{display:inline-block;width:14px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.tl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.tl li{display:grid;grid-template-columns:96px 14px minmax(0,1fr);gap:0 12px;position:relative}
+.tl .d{font-family:var(--f-num);font-size:12.5px;color:var(--ink-2);padding-top:12px;text-align:right}
+.tl .dot{position:relative}
+.tl .dot::before{content:"";position:absolute;left:6px;top:0;bottom:0;width:2px;background:var(--rule)}
+.tl .dot::after{content:"";position:absolute;left:1px;top:16px;width:12px;height:12px;border-radius:50%;background:var(--panel);border:2px solid var(--ink-3)}
+.tl li.key .dot::after{background:var(--accent);border-color:var(--accent)}
+.tl .b{padding:10px 0 12px;border-bottom:1px solid var(--rule);min-width:0}
+.tl li:last-child .b{border-bottom:0}
+.tl .b h3{margin:0;font-size:14.5px;font-weight:500;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.tl .b p{font-size:13px;color:var(--ink-2);margin-top:3px}
+.tl .k{font-size:11.5px;font-weight:500;color:var(--accent);background:var(--accent-bg);padding:1px 7px;border-radius:999px}
+.sc{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px}
+.scc{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.scc.base{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.scc .p{display:flex;align-items:center;gap:10px}
+.scc .p b{font-family:var(--f-num);font-size:26px;font-weight:500}
+.bar{height:6px;border-radius:3px;background:var(--chip);overflow:hidden;flex:1}
+.bar i{display:block;height:100%;background:var(--accent)}
+.scc h3{margin:0;font-size:15px;font-weight:500}
+.scc p{font-size:13px;color:var(--ink-2)}
+.scc dl{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;margin:0;font-size:12.5px}
+.scc dt{color:var(--ink-3)}.scc dd{margin:0;font-family:var(--f-num);color:var(--ink)}
+.sig{display:flex;flex-direction:column}
+.sr{display:grid;grid-template-columns:14px minmax(0,1.3fr) minmax(0,1fr) minmax(0,1.5fr);gap:10px;align-items:baseline;padding:10px 4px;border-top:1px solid var(--rule);font-size:13px}
+.sr:first-child{border-top:0}
+.sr .lt{width:10px;height:10px;border-radius:50%;align-self:center}
+.lt.bad{background:var(--bad)}.lt.warn{background:var(--warn)}.lt.good{background:var(--good)}.lt.neu{background:var(--ink-3)}
+.sr .n{font-weight:500}
+.sr .v{font-family:var(--f-num);color:var(--ink)}
+.sr .r{color:var(--ink-3);font-size:12.5px}
+.sr .r em{font-style:normal;color:var(--good)}.sr .r u{text-decoration:none;color:var(--bad)}
+.etf{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.ec{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.ec .rk{font-family:var(--f-num);font-size:12px;color:var(--ink-3)}
+.ec h3{margin:0;font-size:15px;font-weight:500;display:flex;justify-content:space-between;gap:8px;align-items:center}
+.ec p{font-size:13px;color:var(--ink-2)}
+.ec .lg{font-size:12px;color:var(--ink-3)}
+.foot{font-size:12px;color:var(--ink-3);display:flex;flex-direction:column;gap:6px}
+.foot a{color:var(--accent)}
+.foot ul{margin:0;padding-left:18px}
+@media (max-width:640px){
+  .wrap{padding-block:16px 36px;gap:18px}
+  .phases{grid-template-columns:1fr}
+  .tl li{grid-template-columns:70px 14px minmax(0,1fr);gap:0 10px}
+  .sr{grid-template-columns:12px minmax(0,1fr);gap:2px 10px}
+  .sr .v,.sr .r{grid-column:2}
+}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>AI行情驱动地图</h1>
+    <p class="lede">AI主线没有结束，正在换挡：从"卖铲子"的算力建设，转向"用铲子"的应用和物理AI。换挡的节奏，由美国利率决定；美国利率，又由油价和核心通胀决定。</p>
+    <span class="stamp">截至2026年10月30日 · 个人推演，不构成投资建议</span>
+  </header>
+
+  <nav aria-label="页面导航">
+    <a href="#phase">叙事阶段</a><a href="#drivers">八个驱动因素</a><a href="#matrix">影响矩阵</a><a href="#timeline">催化剂时间表</a><a href="#scenarios">情景</a><a href="#signals">信号灯</a><a href="#etf">四只ETF</a>
+  </nav>
+
+  <div class="thesis" role="note" aria-label="三句话结论">
+    <div><b>二阶导数还没见底</b><span>巨头资本开支仍在增长，但增速在放缓。只要增速继续放缓，算力硬件股就难真正走强。</span></div>
+    <div><b>一阶导数没有转负</b><span>需求仍大于供给，存储紧缺延续到2027年。这更像2018、2022年式的周期调整，不是2000年式的长熊。</span></div>
+    <div><b>利率是总开关</b><span>美联储什么时候停止加息，决定新故事什么时候能展开。最可能在2027年二到三季度。</span></div>
+  </div>
+
+  <section id="phase">
+    <div class="sh"><h2>AI叙事走到哪一步了</h2><span class="muted">当前位置用黄色框标出</span></div>
+    <div class="phases">
+      <div class="ph"><div class="t">2023 – 2026年三季度</div><b>建设期</b><p>买GPU、存储、光模块，建数据中心。科创50、韩股、台股是主要受益者。</p></div>
+      <div class="ph now"><div class="t">2026年四季度 – 2027年上半年</div><b>空窗期</b><p>建设增速放缓，应用还没被业绩证明。资金躲进银行、红利、能源。</p><span class="tag">我们在这里</span></div>
+      <div class="ph"><div class="t">2027年下半年起</div><b>应用与物理AI</b><p>智能体、企业AI变现、机器人。平台公司（恒生科技）和机器人产业链有望接棒。</p></div>
+    </div>
+  </section>
+
+  <section id="drivers">
+    <div class="sh"><h2>八个驱动因素</h2><span class="muted">标签表示它对科技股的当前方向</span></div>
+    <div class="drivers">
+      <article class="dc"><div class="top"><h3>美联储利率</h3><span class="pill bad">利空</span></div>
+        <div class="read">3.75%–4.00% · 12月加息概率约85%</div>
+        <p class="why">9月重启加息，10月偏鹰派暂停，两位委员要求加息。期货显示2027年9月利率约4.7%。</p>
+        <p class="th"><b>转好信号：</b>明确暗示这是最后一次加息</p></article>
+      <article class="dc"><div class="top"><h3>国际油价</h3><span class="pill bad">利空</span></div>
+        <div class="read">布伦特约112–116美元 · 连涨4个月</div>
+        <p class="why">伊朗冲突、霍尔木兹海峡风险、胡塞武装袭击沙特设施。这是美国通胀的主要来源。</p>
+        <p class="th"><b>好：</b>跌破100并站稳 · <b>坏：</b>突破120</p></article>
+      <article class="dc"><div class="top"><h3>美国核心通胀</h3><span class="pill warn">在变坏</span></div>
+        <div class="read">核心CPI 2.6%（前值2.4%）· 整体3.7%</div>
+        <p class="why">机票同比+22.4%，核心商品单月+0.3%，PPI 6.3%。油价正在往服务和商品价格里传导。</p>
+        <p class="th"><b>好：</b>回到2.5%以下 · <b>坏：</b>连续两个月高于3%</p></article>
+      <article class="dc"><div class="top"><h3>AI资本开支增速</h3><span class="pill warn">二阶导下降</span></div>
+        <div class="read">2026年四巨头约7250亿美元（+77%）</div>
+        <p class="why">2027年预计超1万亿美元，增速降到30%–40%。谷歌称2027年将"大幅增加"，约3000亿美元。</p>
+        <p class="th"><b>坏：</b>任何一家巨头下调2027年指引</p></article>
+      <article class="dc"><div class="top"><h3>AI应用变现</h3><span class="pill neu">分化</span></div>
+        <div class="read">谷歌云+103% · OpenAI全年预期下调至约500亿美元</div>
+        <p class="why">企业端在兑现（Anthropic三季度营收环比+45%），消费端付费弱于预期。赢家集中在少数公司。</p>
+        <p class="th"><b>考试：</b>Anthropic、OpenAI的上市估值能否被接受</p></article>
+      <article class="dc"><div class="top"><h3>物理AI</h3><span class="pill good">试探升温</span></div>
+        <div class="read">宇树7个交易日+66% · 优必选仍弱</div>
+        <p class="why">中国真正的全球优势：永磁体约占全球产能九成。但目前只有龙头涨，商业化在2028年以后。</p>
+        <p class="th"><b>转强信号：</b>减速器、丝杠、传感器等供应链普涨</p></article>
+      <article class="dc"><div class="top"><h3>存储芯片周期</h3><span class="pill warn">双刃剑</span></div>
+        <div class="read">三星、海力士：2027年更紧缺</div>
+        <p class="why">利好存储和算力，但挤压终端：英特尔预计PC销量今年−12%、明年−10%。彭博认为2028年或过剩。</p>
+        <p class="th"><b>坏：</b>存储合约价开始下跌</p></article>
+      <article class="dc"><div class="top"><h3>中国因素</h3><span class="pill warn">偏弱</span></div>
+        <div class="read">沪深300连跌11周 · 银行股创新高</div>
+        <p class="why">资金从科技转向红利。美国FCC考虑禁用中国光模块。平台价格战仍在。</p>
+        <p class="th"><b>转好信号：</b>中央经济工作会议出台超预期的消费和平台政策</p></article>
+    </div>
+  </section>
+
+  <section id="matrix">
+    <div class="sh"><h2>谁对什么最敏感</h2><span class="muted">手机上可左右滑动表格</span></div>
+    <div class="panel">
+      <div class="mx">
+        <table aria-label="驱动因素对四类资产的影响强度">
+          <thead><tr><th scope="col">驱动因素</th><th class="c" scope="col">科创50 / 人工智能ETF</th><th class="c" scope="col">消费电子ETF</th><th class="c" scope="col">机器人ETF</th><th class="c" scope="col">恒生科技</th></tr></thead>
+          <tbody>
+            <tr><td class="rn">美联储利率<small>高估值最怕高利率</small></td><td class="s s3">强</td><td class="s s2">中</td><td class="s s2">中</td><td class="s s3">强<br><span class="muted">港币挂钩美元</span></td></tr>
+            <tr><td class="rn">油价与通胀<small>经由利率传导</small></td><td class="s s2">中</td><td class="s s2">中</td><td class="s s1">弱</td><td class="s s2">中</td></tr>
+            <tr><td class="rn">AI资本开支增速</td><td class="s s3">强</td><td class="s s2">中<br><span class="muted">PCB、存储</span></td><td class="s s1">弱</td><td class="s s1">弱</td></tr>
+            <tr><td class="rn">存储芯片价格</td><td class="s s2">中 ↑</td><td class="s s3">强 ↕<br><span class="muted">存储受益，终端受损</span></td><td class="s s1">弱</td><td class="s s2">中 ↓<br><span class="muted">联想、小米</span></td></tr>
+            <tr><td class="rn">AI应用变现</td><td class="s s2">中</td><td class="s s1">弱</td><td class="s s1">弱</td><td class="s s3">强</td></tr>
+            <tr><td class="rn">物理AI进展</td><td class="s s1">弱</td><td class="s s1">弱</td><td class="s s3">强</td><td class="s s1">弱</td></tr>
+            <tr><td class="rn">中国消费与平台政策</td><td class="s s2">中</td><td class="s s2">中</td><td class="s s2">中</td><td class="s s3">强</td></tr>
+            <tr><td class="rn">出口管制与地缘<small>如FCC光模块禁令</small></td><td class="s s3">强</td><td class="s s2">中</td><td class="s s1">弱</td><td class="s s2">中</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="mxleg" style="margin-top:10px"><span><i style="background:var(--h3)"></i>强</span><span><i style="background:var(--h2)"></i>中</span><span><i style="background:var(--h1)"></i>弱</span><span>↑ 利好 · ↓ 利空 · ↕ 双向</span></div>
+    </div>
+  </section>
+
+  <section id="timeline">
+    <div class="sh"><h2>未来一年的催化剂</h2><span class="muted">蓝点为最关键节点</span></div>
+    <div class="panel">
+      <ol class="tl">
+        <li><span class="d">11/03</span><span class="dot"></span><div class="b"><h3>美国中期选举</h3><p>海外风险偏好的事件窗口。</p></div></li>
+        <li class="key"><span class="d">11/18前后</span><span class="dot"></span><div class="b"><h3>英伟达财报 <span class="k">短期情绪</span></h3><p>营收指引1080亿美元±2%。超预期：科创50月底或到1330–1380；仅达标：1150–1220。决定"AI是否还在加速"。</p></div></li>
+        <li><span class="d">11月中下旬</span><span class="dot"></span><div class="b"><h3>腾讯、阿里、美团三季报</h3><p>看价格战是否缓和、AI能否单独贡献利润。决定恒生科技的反弹力度。</p></div></li>
+        <li class="key"><span class="d">12/09</span><span class="dot"></span><div class="b"><h3>美联储议息 <span class="k">二次探底风险</span></h3><p>加息约85%已被预期。偏鹰（暗示继续加）：再跌8%–12%；偏鸽：跌3%–5%后企稳；不加息：涨5%–8%。</p></div></li>
+        <li><span class="d">12月中旬</span><span class="dot"></span><div class="b"><h3>中央经济工作会议</h3><p>消费、平台、科技自主政策。对恒生科技影响最大。</p></div></li>
+        <li class="key"><span class="d">27年1–2月</span><span class="dot"></span><div class="b"><h3>美国巨头四季报：2027年资本开支 <span class="k">决定中期底部</span></h3><p>预期合计超1万亿美元。继续增加，长熊基本排除；有人下调，悲观情形成立。</p></div></li>
+        <li><span class="d">27年3月</span><span class="dot"></span><div class="b"><h3>全国两会</h3><p>政策预期窗口。</p></div></li>
+        <li><span class="d">27年二–三季度</span><span class="dot"></span><div class="b"><h3>美联储加息周期见顶（预计）</h3><p>油价若提前大幅回落，可能提前到一季度。</p></div></li>
+        <li><span class="d">27年内</span><span class="dot"></span><div class="b"><h3>Anthropic、OpenAI上市</h3><p>AI应用能否赚钱的公开考试。</p></div></li>
+        <li><span class="d">27年底</span><span class="dot"></span><div class="b"><h3>存储芯片新产能开始释放</h3><p>涨价逻辑减弱，科创50涨速放缓。</p></div></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="scenarios">
+    <div class="sh"><h2>三种情景</h2><span class="muted">10月30日按最新信息微调了概率</span></div>
+    <div class="sc">
+      <article class="scc base"><div class="p"><b>45%</b><span class="bar"><i style="width:45%"></i></span></div>
+        <h3>基准：反弹 → 二次探底 → 明年上半年筑底</h3>
+        <p>11月超跌反弹，12月因加息再跌一次，明年1–2月巨头确认资本开支后筑底，之后慢涨。两年内回不到前高。</p>
+        <dl><dt>科创50底部</dt><dd>约1000–1150</dd><dt>恒生科技底部</dt><dd>约3400–3600</dd><dt>时间</dt><dd>12月–明年一季度</dd></dl></article>
+      <article class="scc"><div class="p"><b>25%</b><span class="bar"><i style="width:25%"></i></span></div>
+        <h3>乐观：底部就在当前区域</h3>
+        <p>英伟达超预期、美联储偏鸽、油价回落，三者同时出现。</p>
+        <dl><dt>科创50</dt><dd>1150–1250一带见底</dd><dt>恒生科技</dt><dd>3700一带见底</dd><dt>确认信号</dt><dd>科创50站上1460</dd></dl></article>
+      <article class="scc"><div class="p"><b>30%</b><span class="bar"><i style="width:30%"></i></span></div>
+        <h3>悲观：AI投资退潮，长期磨底</h3>
+        <p>巨头下调资本开支，或AI公司出现信用事件；核心通胀持续高于3%。</p>
+        <dl><dt>科创50</dt><dd>900–1000</dd><dt>恒生科技</dt><dd>3000–3200</dd><dt>确认信号</dt><dd>科创50跌破1050</dd></dl></article>
+    </div>
+  </section>
+
+  <section id="signals">
+    <div class="sh"><h2>信号灯</h2><span class="muted">绿 = 对科技股有利 · 黄 = 观察 · 红 = 不利</span></div>
+    <div class="panel sig" role="list">
+      <div class="sr" role="listitem"><span class="lt bad" aria-label="红灯"></span><span class="n">美联储12月加息概率</span><span class="v">约85%</span><span class="r">好：暗示最后一次 · 坏：暗示继续加</span></div>
+      <div class="sr" role="listitem"><span class="lt bad" aria-label="红灯"></span><span class="n">布伦特原油</span><span class="v">约112–116美元</span><span class="r"><em>好 &lt;100</em> · <u>坏 &gt;120</u></span></div>
+      <div class="sr" role="listitem"><span class="lt warn" aria-label="黄灯"></span><span class="n">美国核心CPI（同比）</span><span class="v">2.6%，上升中</span><span class="r"><em>好 &lt;2.5%</em> · <u>坏 连续两月 &gt;3%</u></span></div>
+      <div class="sr" role="listitem"><span class="lt warn" aria-label="黄灯"></span><span class="n">核心服务（月环比）</span><span class="v">0.4%</span><span class="r"><em>好 &lt;0.3%</em> · <u>坏 连续 &gt;0.4%</u></span></div>
+      <div class="sr" role="listitem"><span class="lt good" aria-label="绿灯"></span><span class="n">巨头2027年资本开支</span><span class="v">谷歌：大幅增加</span><span class="r"><em>好 继续增加</em> · <u>坏 任何一家下调</u></span></div>
+      <div class="sr" role="listitem"><span class="lt good" aria-label="绿灯"></span><span class="n">存储芯片供需</span><span class="v">紧缺延续到2027</span><span class="r"><u>坏 合约价开始下跌</u></span></div>
+      <div class="sr" role="listitem"><span class="lt warn" aria-label="黄灯"></span><span class="n">科创50</span><span class="v">约1161（10/30推算）</span><span class="r"><em>乐观线 1460</em> · 支撑 1150 · <u>悲观线 1050</u></span></div>
+      <div class="sr" role="listitem"><span class="lt neu" aria-label="灰灯"></span><span class="n">恒生科技</span><span class="v">3744（10/29）</span><span class="r"><em>乐观线 4250</em> · 支撑 3500 · <u>悲观线 3300</u></span></div>
+      <div class="sr" role="listitem"><span class="lt good" aria-label="绿灯"></span><span class="n">14日RSI（短期）</span><span class="v">科创50约25 · 恒科约30</span><span class="r">两者都在超卖区，短期易反弹，但不等于见底</span></div>
+    </div>
+  </section>
+
+  <section id="etf">
+    <div class="sh"><h2>四只ETF怎么看</h2><span class="muted">按一到两年的排序</span></div>
+    <div class="etf">
+      <article class="ec"><span class="rk">第1 · 应用故事的载体</span><h3>恒生科技 <span class="pill good">分批布局</span></h3><p>跌了13个月，估值低。AI应用变现的直接受益者，也是和A股科技分散最好的一只。</p><span class="lg">风险：美国加息、消费疲软、价格战</span></article>
+      <article class="ec"><span class="rk">第2 · 物理AI · 562500</span><h3>机器人ETF华夏 <span class="pill neu">小仓位跟踪</span></h3><p>方向最对，中国有真实的供应链优势。但只有龙头在涨，估值已贵，不追高。</p><span class="lg">风险：商业化慢、题材波动大</span></article>
+      <article class="ec"><span class="rk">第3 · 算力硬件 · 515980</span><h3>人工智能ETF华富 <span class="pill warn">等指引</span></h3><p>超卖后反弹弹性最大，但处在二阶导下降的核心。等明年1–2月资本开支指引再决定。</p><span class="lg">风险：12月二次探底、FCC禁令</span></article>
+      <article class="ec"><span class="rk">第4 · 存储+PCB+苹果链 · 159732</span><h3>消费电子ETF华夏 <span class="pill bad">回避</span></h3><p>内部逻辑互相打架：存储涨价利好上游，却压低终端需求。基本面最弱。</p><span class="lg">例外：押注AI手机或AI眼镜换机潮</span></article>
+    </div>
+    <p class="muted">人工智能、消费电子、机器人三只都是A股科技主题，涨跌高度同步，同时持有分散效果有限。</p>
+  </section>
+
+  <footer class="foot">
+    <p>每日实盘与推演对照：<a href="../">科创50 · 恒生科技推演对照</a></p>
+    <p>主要数据来源：Alphabet三季报（SEC）、英特尔三季报、KPMG对9月CPI的分析、Admiral Markets对10月美联储会议的整理、FinanceFeeds油价报道、Trending Topics对中国开源模型份额的整理、McKinsey人形机器人供应链图表、新华财经与金十数据的收盘播报。</p>
+    <p>以上为个人推演与常用指标，概率为主观估计，不构成投资建议。</p>
+  </footer>
+</div>
+
+</body>
+</html>
