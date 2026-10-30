@@ -150,7 +150,7 @@ p{margin:0}
   <header>
     <h1>科技股调仓时间轴</h1>
     <p class="sub">把每个关键节点拆成三步：出现什么信号、股价可能怎么走、仓位怎么调。K线是实盘，虚线是最可能路径，圆点编号是节点。</p>
-    <span class="ver"><b>界面预览 v1</b>数据截至2026年10月30日 · 自动抓取尚未接入</span>
+    <span class="ver"><b>v2</b><span id="asof">数据截至2026年10月30日</span> · 每个工作日收盘后自动更新</span>
   </header>
 
   <section aria-label="提示">
@@ -202,9 +202,11 @@ p{margin:0}
     <section class="panel" aria-label="提醒规则">
       <div class="sh"><h2>自动提醒规则</h2><span class="muted">按最新数据判断</span></div>
       <div class="rules" id="rules"></div>
+      <div class="sh" style="margin:16px 0 6px"><h2>推送记录</h2><span class="muted">最近10条</span></div>
+      <div class="news" id="log"></div>
     </section>
     <section class="panel" aria-label="最新消息">
-      <div class="sh"><h2>最新消息</h2><span class="muted">接入后每个工作日自动抓取</span></div>
+      <div class="sh"><h2>最新消息</h2><span class="muted">每个工作日收盘后自动抓取</span></div>
       <div class="news" id="news"></div>
     </section>
   </div>
@@ -214,7 +216,7 @@ p{margin:0}
 
 <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
 <script>
-const DATA={
+let DATA={
  asof:'2026-10-30',
  s:{name:'科创50',base:1228.09,
   bars:[
@@ -293,7 +295,7 @@ function indicators(k){const b=fullBars(k),c=b.map(x=>x.close);let ag=0,al=0;ret
 function pathSeries(k){const P=DATA[k].path;const anchors=P.map((v,i)=>({t:i===0?toD('2026-10-29'):Date.UTC(2026,9+i,28),v}));const out=[];for(let i=1;i<anchors.length;i++){const a=anchors[i-1],b=anchors[i];for(let t=(i===1?a.t:a.t+DAY);t<=b.t;t+=DAY){const wd=new Date(t).getUTCDay();if(wd===0||wd===6)continue;const r=(t-a.t)/(b.t-a.t);const v=a.v+(b.v-a.v)*(1-Math.cos(Math.PI*r))/2;out.push({time:fmtD(t),value:Math.round(v*100)/100})}}return out}
 function pathAt(k,d){const s=pathSeries(k);const t=toD(d);let best=s[0];for(const p of s){if(toD(p.time)<=t)best=p;else break}return best.value}
 
-const IND={s:indicators('s'),h:indicators('h')};
+let IND={s:indicators('s'),h:indicators('h')};
 const last=k=>IND[k][IND[k].length-1];
 
 function triggered(){const ls=last('s'),lh=last('h');return{
@@ -375,7 +377,11 @@ document.getElementById('rg-all').onclick=()=>{RG='all';setBtns();setRange()};
 matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',buildChart);
 new MutationObserver(buildChart).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
 
-renderAlerts();renderPhase();renderNodes();renderRoute();renderRules();renderNews();buildChart();
+function renderLog(){const box=document.getElementById('log');box.innerHTML='';const L=(DATA.alerts||[]).slice(-10).reverse();if(!L.length){box.innerHTML='<p class="muted">还没有推送记录。第一次推送在下一个交易日收盘后。</p>';return}L.forEach(a=>{const d=document.createElement('div');d.className='nw';d.innerHTML='<span class="d">'+String(a.date||'').slice(5).replace('-','/')+'</span><div><b style="color:var('+(a.level==='action'?'--bad':'--ink')+')">'+(a.level==='action'?'【需要操作】':'【简报】')+'</b> '+(a.text||'')+'</div>';box.appendChild(d)})}
+function renderAll(){IND={s:indicators('s'),h:indicators('h')};const a=document.getElementById('asof');if(a)a.textContent='数据截至'+cnDate(DATA.asof);renderAlerts();renderPhase();renderNodes();renderRoute();renderRules();renderNews();renderLog();buildChart()}
+renderAll();
+(async()=>{try{const r=await fetch('data.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();const ok=b=>Array.isArray(b)&&b.length&&b.every(x=>Array.isArray(x)&&typeof x[0]==='string'&&Number.isFinite(+x[4]));
+ if(j.s&&ok(j.s.bars))DATA.s.bars=j.s.bars;if(j.h&&ok(j.h.bars))DATA.h.bars=j.h.bars;if(j.macro)DATA.macro={...DATA.macro,...j.macro};if(Array.isArray(j.news)&&j.news.length)DATA.news=j.news;if(Array.isArray(j.alerts))DATA.alerts=j.alerts;if(typeof j.asof==='string')DATA.asof=j.asof;renderAll()}catch(e){}})();
 </script>
 
 </body>
