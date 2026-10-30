@@ -117,6 +117,23 @@ p{margin:0}
 .act i.stop{background:var(--bad-bg);color:var(--bad)}
 .act b{font-weight:500;color:var(--ink)}
 .route{display:flex;flex-direction:column;gap:10px}
+.exp{font-size:13px;color:var(--ink-2);background:var(--accent-bg);border-radius:8px;padding:8px 10px}
+.exp b{font-weight:500;color:var(--ink)}
+.exp.pend{background:var(--chip);color:var(--ink-3)}
+.pk{display:inline-block;margin-left:6px;font-size:11px;font-weight:500;color:var(--accent);background:var(--accent-bg);padding:0 6px;border-radius:4px}
+.res{font-size:12.5px;padding:6px 10px;border-radius:6px}
+.res.hit{background:var(--good-bg);color:var(--good)}.res.miss{background:var(--bad-bg);color:var(--bad)}.res.part{background:var(--warn-bg);color:var(--warn)}
+.acc{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}
+.tb{width:100%;border-collapse:collapse;font-size:13px}
+.tb th{font-weight:500;color:var(--ink-3);font-size:12px;text-align:left;padding:6px 6px;border-bottom:1px solid var(--rule)}
+.tb td{padding:7px 6px;border-bottom:1px solid var(--rule);vertical-align:top}
+.tb td.n{font-family:var(--f-num);text-align:right;white-space:nowrap}
+.tb th.n{text-align:right}
+.score{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:8px}
+.score div{display:flex;flex-direction:column}
+.score b{font-family:var(--f-num);font-size:22px;font-weight:500}
+.score span{font-size:12px;color:var(--ink-3)}
+.tw{overflow-x:auto}
 .rt{display:grid;grid-template-columns:minmax(0,0.9fr) minmax(0,1.6fr);gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--rule)}
 .rt:first-child{border-top:0;padding-top:0}
 .rt h3{font-size:14px}
@@ -139,6 +156,7 @@ p{margin:0}
 .two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}
 .foot{font-size:12px;color:var(--ink-3)}
 @media (max-width:720px){
+  .acc{grid-template-columns:1fr}
   .wrap{padding-block:14px 32px;gap:14px}
   .posture,.two{grid-template-columns:1fr}
   #kc{height:340px}
@@ -208,6 +226,22 @@ p{margin:0}
     <div class="route" id="route"></div>
   </section>
 
+  <section class="panel" aria-label="推演准确率">
+    <div class="sh"><h2>推演准确率记录</h2><span class="muted">检验这套框架靠不靠谱</span></div>
+    <div class="acc">
+      <div>
+        <h3 style="font-size:14px;margin-bottom:8px">节点：推演分支 vs 实际分支</h3>
+        <div class="score" id="acc-score"></div>
+        <div class="tw"><table class="tb" id="acc-nodes"></table></div>
+      </div>
+      <div>
+        <h3 style="font-size:14px;margin-bottom:8px">路径：最可能点位 vs 实盘</h3>
+        <div class="tw"><table class="tb" id="acc-path"></table></div>
+        <p class="muted" style="margin-top:6px">每月28日为检查点，自动计算。偏离在±10%以内算基本吻合。</p>
+      </div>
+    </div>
+  </section>
+
   <div class="two">
     <section class="panel" aria-label="提醒规则">
       <div class="sh"><h2>自动提醒规则</h2><span class="muted">按最新数据判断</span></div>
@@ -228,6 +262,11 @@ p{margin:0}
 <script>
 let DATA={
  asof:'2026-10-30',
+ expect:{
+  '2026-11-18':{c:'公司指引营收1080亿美元±2%；预测市场多数押注1100亿–1120亿美元，比指引高约2%–4%',p:'只达到指引就算不及市场预期，股价可能下跌；要明显超过1120亿并上调下季度指引，才算真正利好',u:'2026-10-30',src:'Manifold预测市场'},
+  '2026-12-09':{c:'CME FedWatch显示加息25个基点的概率约85%',p:'加息本身已基本被定价；真正影响股价的是措辞：暗示继续加是利空，暗示最后一次是利好',u:'2026-10-28',src:'FedWatch（Admiral Markets整理）'},
+  '2027-02-05':{c:'Evercore、美国银行预计四巨头2027年资本开支合计超1万亿美元；谷歌已表示约3000亿美元',p:'只兑现1万亿算符合预期；明显高于1万亿才是增量利好；任何一家下调都是重大利空',u:'2026-10-30',src:'FT、Fortune'}},
+ record:[],
  s:{name:'科创50',base:1228.09,
   bars:[
    ['2026-08-31',null,null,null,1684.39,1],['2026-09-01',null,null,null,1647.53,1],['2026-09-02',null,null,null,1617.60,1],['2026-09-03',null,null,null,1611.17,1],['2026-09-04',null,null,null,1577.36,1],['2026-09-07',null,null,null,1615.53,1],['2026-09-08',null,null,null,1591.00,1],['2026-09-09',null,null,null,1580.06,1],['2026-09-10',null,null,null,1569.22,1],
@@ -267,10 +306,10 @@ const NODES=[
    {i:'核心CPI回落到2.5%以下',p:'加息预期降温，科技股+2%–4%',a:[['hold','全部','维持，提高乐观情形权重']]},
    {i:'核心CPI 2.6%–3.0%',p:'影响有限',a:[['hold','全部','维持']]},
    {i:'核心CPI高于3%',p:'科技股−3%–6%，二次探底提前',a:[['cut','人工智能ETF','减到5%'],['hold','恒生科技','不动']]}]},
- {d:'2026-11-18',lab:'11/18前后',key:true,t:'英伟达财报',watch:'营收与<b>1080亿美元±2%</b>的指引相比，以及下季度指引和数据中心增速。',br:[
-   {i:'超预期且上调指引',p:'科创50 +8%–12%，月底1330–1380',a:[['cut','人工智能ETF','反弹到1330上方时减半（10%→5%）'],['hold','恒生科技','不动']]},
-   {i:'只是达标，指引平淡',p:'科创50在1150–1220徘徊',a:[['hold','全部','不动，等12月']]},
-   {i:'不及预期',p:'科创50跌破1150，看1100',a:[['hold','全部','不加仓'],['stop','人工智能ETF','若收盘跌破1050，按悲观触发清仓']]}]},
+ {d:'2026-11-18',lab:'11/18前后',key:true,t:'英伟达财报',watch:'营收和下季度指引<b>相对市场预期</b>（不只是相对公司指引）超出多少，以及数据中心增速。',br:[
+   {i:'明显超出市场预期，并上调指引',p:'科创50 +8%–12%，月底1330–1380',a:[['cut','人工智能ETF','反弹到1330上方时减半（10%→5%）'],['hold','恒生科技','不动']]},
+   {i:'只达到指引或市场预期',p:'好消息也可能下跌，科创50在1150–1220徘徊',a:[['hold','全部','不动，等12月']]},
+   {i:'低于公司指引',p:'科创50跌破1150，看1100',a:[['hold','全部','不加仓'],['stop','人工智能ETF','若收盘跌破1050，按悲观触发清仓']]}]},
  {d:'2026-11-20',lab:'11月中下旬',t:'腾讯、阿里、美团三季报',watch:'AI收入或云业务增速、价格战是否缓和、利润率。',br:[
    {i:'AI单独贡献收入，利润改善',p:'恒生科技+5%–8%，到3950–4100',a:[['hold','恒生科技','持有；回调到3700以下可加到30%']]},
    {i:'价格战加剧，利润下滑',p:'恒生科技回落到3500附近',a:[['hold','恒生科技','不急着加，等12月一起加']]}]},
@@ -292,6 +331,7 @@ const NODES=[
    {i:'继续加息',p:'估值继续承压',a:[['hold','全部','维持较高现金']]}]}
 ];
 
+const PICK={'2026-11-03':0,'2026-11-12':1,'2026-11-18':0,'2026-11-20':0,'2026-12-09':0,'2026-12-15':1,'2027-02-05':0,'2027-03-08':1,'2027-06-16':0};
 const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const DAY=864e5;
 const toD=s=>Date.parse(s+'T00:00:00Z');
@@ -320,7 +360,7 @@ function renderPhase(){const [id,why]=currentPhase();const p=PLANS[id];document.
 
 function daysTo(d){return Math.round((toD(d)-toD(today))/DAY)}
 function renderAlerts(){const box=document.getElementById('alerts');box.innerHTML='';const add=(cls,tag,html)=>{const d=document.createElement('div');d.className='al '+cls;d.innerHTML='<span class="tg">'+tag+'</span><div>'+html+'</div>';box.appendChild(d)};
- const next=NODES.find(n=>daysTo(n.d)>=0);if(next){const dd=daysTo(next.d);add(dd<=3?'warn':'info',dd===0?'今天':dd<=3?'即将到来':'下一个节点',(dd===0?'今天':dd+'天后')+'：<b>'+next.t+'</b>（'+next.lab+'）。看：'+next.watch.replace(/<[^>]+>/g,''))}
+ const next=NODES.find(n=>daysTo(n.d)>=0);if(next){const dd=daysTo(next.d);{const E=(DATA.expect||{})[next.d];add(dd<=3?'warn':'info',dd===0?'今天':dd<=3?'即将到来':'下一个节点',(dd===0?'今天':dd+'天后')+'：<b>'+next.t+'</b>（'+next.lab+'）。看：'+next.watch.replace(/<[^>]+>/g,'')+(E?'<br>市场已预期：'+E.c+'。'+E.p:''))}}
  const ls=last('s'),lh=last('h');const tr=triggered();
  if(tr.sPes||tr.hPes)add('bad','悲观触发','指数跌破悲观线，按防守仓位执行。');
  if(tr.sOpt||tr.hOpt)add('good','乐观触发','12月前站上乐观线，二次探底大概率不会出现。');
@@ -357,8 +397,11 @@ function showDet(t){const k=IX;const b=IND[k].find(x=>x.time===t);const f=pathAt
 function renderNodes(){const box=document.getElementById('nodes');box.innerHTML='';const lab={add:'加仓',cut:'减仓',hold:'持有',stop:'止损'};
  NODES.forEach((n,i)=>{const dd=daysTo(n.d);const soon=dd>=0&&dd<=3;const past=dd<0;const el=document.createElement('article');el.className='nd'+(n.key?' key':'')+(soon?' soon':'')+(past?' past':'');el.id='node-'+(i+1);
   let h='<div class="nh"><span class="no">'+(i+1)+'</span><span class="dt">'+n.lab+'</span><h3>'+n.t+'</h3>'+(n.key?'<span class="kk">关键</span>':'')+'<span class="cd'+(soon?' soon':'')+'">'+(past?'已过':dd===0?'今天':dd+'天后')+'</span></div>';
-  h+='<p class="watch"><b>看什么：</b>'+n.watch+'</p><div class="br"><div class="brr hd"><span>出现的信号</span><span>股价可能</span><span>操作</span></div>';
-  n.br.forEach(b=>{h+='<div class="brr"><div class="if">'+b.i+'</div><div class="px">'+b.p+'</div><div class="acts">'+b.a.map(a=>'<div class="act"><i class="'+a[0]+'">'+lab[a[0]]+'</i><span><b>'+a[1]+'</b> '+a[2]+'</span></div>').join('')+'</div></div>'});
+  h+='<p class="watch"><b>看什么：</b>'+n.watch+'</p>';
+  const E=(DATA.expect||{})[n.d];if(E)h+='<p class="exp"><b>市场已经预期：</b>'+E.c+(E.im?'；期权隐含波动约'+E.im:'')+'。<br><b>所以：</b>'+E.p+' <span class="muted">（'+cnDate(E.u)+'更新'+(E.src?' · '+E.src:'')+'）</span></p>';else if(!past&&dd<=10)h+='<p class="exp pend">节点前一天会自动补上"市场已经预期了多少"。</p>';
+  const R=(DATA.record||[]).find(r=>r.date===n.d);if(R)h+='<p class="res '+(R.hit===true?'hit':R.hit===false?'miss':'part')+'">实际：'+R.actual+'（'+(R.hit===true?'推演命中':R.hit===false?'推演未命中':'部分命中')+'）'+(R.note?' · '+R.note:'')+'</p>';
+  h+='<div class="br"><div class="brr hd"><span>出现的信号</span><span>股价可能</span><span>操作</span></div>';
+  n.br.forEach((b,bi)=>{h+='<div class="brr"><div class="if">'+b.i+(PICK[n.d]===bi?'<span class="pk">推演</span>':'')+'</div><div class="px">'+b.p+'</div><div class="acts">'+b.a.map(a=>'<div class="act"><i class="'+a[0]+'">'+lab[a[0]]+'</i><span><b>'+a[1]+'</b> '+a[2]+'</span></div>').join('')+'</div></div>'});
   h+='</div>';el.innerHTML=h;box.appendChild(el)})}
 
 function renderRoute(){const box=document.getElementById('route');box.innerHTML='';const cur=currentPhase()[0];
@@ -395,10 +438,18 @@ function renderToday(){const el=document.getElementById('today');const A=(DATA.a
  else{const cr=[...crossings('s'),...crossings('h')];const acts=[];cr.forEach(({k,L,c})=>{const n=DATA[k].name;if(L.t==='悲观线'){acts.push('<b>'+n+'收盘'+c.toFixed(0)+'，跌破悲观线'+L.p+'</b>：'+wStr(PLANS.PX.w)+'（人工智能清仓）')}else if(L.t==='乐观线'){acts.push('<b>'+n+'收盘'+c.toFixed(0)+'，站上乐观线'+L.p+'</b>：调到'+wStr(PLANS.P3.w))}else if(L.t==='反弹减仓线'){acts.push('<b>'+n+'收盘'+c.toFixed(0)+'，到达反弹减仓线'+L.p+'</b>：人工智能ETF减半到5%，其他不动')}else if(L.t==='支撑'){ops.push(n+'收盘'+c.toFixed(0)+'，跌破支撑'+L.p+'：先不加仓，等12月9日美联储会议后按二次探底计划分批买')}});
   if(acts.length){act=true;big='需要操作';ops=acts.concat(ops)}else{big='今日无需买卖';ops.unshift('维持当前示例仓位：'+wStr(ph.w))}}
  el.className='today'+(act?' act':'');el.innerHTML='<span class="lb">'+cnDate(DATA.asof)+' 收盘后的信号</span><span class="big">'+big+'</span><div class="ops">'+ops.map(o=>'<div>'+o+'</div>').join('')+'</div><span class="ft">按预设规则自动生成，不构成投资建议。每个工作日收盘后（北京时间16:47左右）更新，刷新页面查看。</span>'}
-function renderAll(){IND={s:indicators('s'),h:indicators('h')};const a=document.getElementById('asof');if(a)a.textContent='数据截至'+cnDate(DATA.asof);renderToday();renderAlerts();renderPhase();renderNodes();renderRoute();renderRules();renderNews();renderLog();buildChart()}
+function renderAcc(){const R=DATA.record||[];const sc=document.getElementById('acc-score');const hit=R.filter(r=>r.hit===true).length,part=R.filter(r=>r.hit==='part').length,miss=R.filter(r=>r.hit===false).length;
+ sc.innerHTML='<div><b>'+R.length+'</b><span>已结束节点</span></div><div><b style="color:var(--good)">'+hit+'</b><span>命中</span></div><div><b style="color:var(--warn)">'+part+'</b><span>部分命中</span></div><div><b style="color:var(--bad)">'+miss+'</b><span>未命中</span></div>';
+ const tn=document.getElementById('acc-nodes');if(!R.length){tn.innerHTML='<tr><td class="muted">还没有结束的节点。第一个是11月3日美国中期选举，结果出来后自动记录。</td></tr>'}else{tn.innerHTML='<tr><th>节点</th><th>推演</th><th>实际</th><th>结果</th></tr>'+R.map(r=>'<tr><td>'+r.date.slice(5).replace('-','/')+' '+r.node+'</td><td>'+r.predicted+'</td><td>'+r.actual+'</td><td>'+(r.hit===true?'<span style="color:var(--good)">命中</span>':r.hit===false?'<span style="color:var(--bad)">未命中</span>':'<span style="color:var(--warn)">部分</span>')+'</td></tr>').join('')}
+ const tp=document.getElementById('acc-path');let rows='<tr><th>日期</th><th class="n">科创50 推演/实盘</th><th class="n">恒科 推演/实盘</th></tr>';
+ const cell=(k,d,f)=>{const b=IND[k].filter(x=>x.time<=d).pop();if(!b||toD(d)-toD(b.time)>7*DAY)return'<td class="n">'+Math.round(f)+' / —</td>';const e=(b.close/f-1)*100;return'<td class="n">'+Math.round(f)+' / '+Math.round(b.close)+'<br><span style="color:var('+(Math.abs(e)<=10?'--good':'--bad')+')">'+fmt(e)+'</span></td>'};
+ for(let i=1;i<=24;i++){const d=fmtD(Date.UTC(2026,9+i,28));if(d>DATA.asof)break;rows+='<tr><td>'+d.slice(2).replace(/-/g,'/')+'</td>'+cell('s',d,DATA.s.path[i])+cell('h',d,DATA.h.path[i])+'</tr>'}
+ const ls=last('s'),lh=last('h');rows+='<tr><td>最新（'+ls.time.slice(5).replace('-','/')+'）</td>'+cell('s',ls.time,pathAt('s',ls.time))+cell('h',lh.time,pathAt('h',lh.time))+'</tr>';
+ tp.innerHTML=rows}
+function renderAll(){IND={s:indicators('s'),h:indicators('h')};const a=document.getElementById('asof');if(a)a.textContent='数据截至'+cnDate(DATA.asof);renderToday();renderAlerts();renderPhase();renderNodes();renderRoute();renderAcc();renderRules();renderNews();renderLog();buildChart()}
 renderAll();
 (async()=>{try{const r=await fetch('data.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();const ok=b=>Array.isArray(b)&&b.length&&b.every(x=>Array.isArray(x)&&typeof x[0]==='string'&&Number.isFinite(+x[4]));
- if(j.s&&ok(j.s.bars))DATA.s.bars=j.s.bars;if(j.h&&ok(j.h.bars))DATA.h.bars=j.h.bars;if(j.macro)DATA.macro={...DATA.macro,...j.macro};if(Array.isArray(j.news)&&j.news.length)DATA.news=j.news;if(Array.isArray(j.alerts))DATA.alerts=j.alerts;if(typeof j.asof==='string')DATA.asof=j.asof;renderAll()}catch(e){}})();
+ if(j.s&&ok(j.s.bars))DATA.s.bars=j.s.bars;if(j.h&&ok(j.h.bars))DATA.h.bars=j.h.bars;if(j.macro)DATA.macro={...DATA.macro,...j.macro};if(Array.isArray(j.news)&&j.news.length)DATA.news=j.news;if(Array.isArray(j.alerts))DATA.alerts=j.alerts;if(j.expect&&typeof j.expect==='object')DATA.expect=j.expect;if(Array.isArray(j.record))DATA.record=j.record;if(typeof j.asof==='string')DATA.asof=j.asof;renderAll()}catch(e){}})();
 </script>
 
 </body>
