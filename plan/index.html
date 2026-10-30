@@ -43,6 +43,14 @@ p{margin:0}
 .ver b{font-weight:500;color:var(--warn);background:var(--warn-bg);padding:1px 8px;border-radius:999px}
 .panel{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:14px 16px}
 .sh{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 12px;margin-bottom:10px}
+.today{border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;border:1.5px solid var(--good);background:var(--good-bg)}
+.today.act{background:var(--bad-bg);border-color:var(--bad)}
+.today .lb{font-size:12px;color:var(--ink-2)}
+.today .big{font-size:20px;font-weight:500;color:var(--good)}
+.today.act .big{color:var(--bad)}
+.today .ops{display:flex;flex-direction:column;gap:3px;font-size:14px;color:var(--ink)}
+.today .ops b{font-weight:500}
+.today .ft{font-size:12px;color:var(--ink-3)}
 .alerts{display:flex;flex-direction:column;gap:8px}
 .al{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:start;padding:10px 12px;border-radius:8px;font-size:13.5px}
 .al .tg{font-size:11.5px;font-weight:500;padding:2px 8px;border-radius:999px;white-space:nowrap;margin-top:1px}
@@ -152,6 +160,8 @@ p{margin:0}
     <p class="sub">把每个关键节点拆成三步：出现什么信号、股价可能怎么走、仓位怎么调。K线是实盘，虚线是最可能路径，圆点编号是节点。</p>
     <span class="ver"><b>v2</b><span id="asof">数据截至2026年10月30日</span> · 每个工作日收盘后自动更新</span>
   </header>
+
+  <section aria-label="今日买卖信号"><div class="today" id="today" role="status"></div></section>
 
   <section aria-label="提示">
     <div class="alerts" id="alerts"></div>
@@ -378,7 +388,14 @@ matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',buildChar
 new MutationObserver(buildChart).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
 
 function renderLog(){const box=document.getElementById('log');box.innerHTML='';const L=(DATA.alerts||[]).slice(-10).reverse();if(!L.length){box.innerHTML='<p class="muted">还没有推送记录。第一次推送在下一个交易日收盘后。</p>';return}L.forEach(a=>{const d=document.createElement('div');d.className='nw';d.innerHTML='<span class="d">'+String(a.date||'').slice(5).replace('-','/')+'</span><div><b style="color:var('+(a.level==='action'?'--bad':'--ink')+')">'+(a.level==='action'?'【需要操作】':'【简报】')+'</b> '+(a.text||'')+'</div>';box.appendChild(d)})}
-function renderAll(){IND={s:indicators('s'),h:indicators('h')};const a=document.getElementById('asof');if(a)a.textContent='数据截至'+cnDate(DATA.asof);renderAlerts();renderPhase();renderNodes();renderRoute();renderRules();renderNews();renderLog();buildChart()}
+function crossings(k){const b=IND[k];if(b.length<2)return[];const t=b[b.length-1],p=b[b.length-2];const out=[];DATA[k].lines.forEach(L=>{const up=L.k==='good'||L.k==='warn';if(L.k==='good'&&t.time>'2026-12-31')return;const now=up?t.close>=L.p:t.close<=L.p,before=up?p.close>=L.p:p.close<=L.p;if(now&&!before)out.push({k,L,c:t.close})});return out}
+const wStr=w=>Object.entries(w).filter(([k,v])=>v>0).map(([k,v])=>ETF[k][0]+' '+v+'%').join('、');
+function renderToday(){const el=document.getElementById('today');const A=(DATA.alerts||[]).filter(a=>a.date===DATA.asof).pop();const ph=PLANS[currentPhase()[0]];let act=false,big='',ops=[];
+ if(A){act=A.level==='action';big=act?'需要操作':'今日无需买卖';ops=[String(A.text||'').replace(/^【[^】]*】/,'')]}
+ else{const cr=[...crossings('s'),...crossings('h')];const acts=[];cr.forEach(({k,L,c})=>{const n=DATA[k].name;if(L.t==='悲观线'){acts.push('<b>'+n+'收盘'+c.toFixed(0)+'，跌破悲观线'+L.p+'</b>：'+wStr(PLANS.PX.w)+'（人工智能清仓）')}else if(L.t==='乐观线'){acts.push('<b>'+n+'收盘'+c.toFixed(0)+'，站上乐观线'+L.p+'</b>：调到'+wStr(PLANS.P3.w))}else if(L.t==='反弹减仓线'){acts.push('<b>'+n+'收盘'+c.toFixed(0)+'，到达反弹减仓线'+L.p+'</b>：人工智能ETF减半到5%，其他不动')}else if(L.t==='支撑'){ops.push(n+'收盘'+c.toFixed(0)+'，跌破支撑'+L.p+'：先不加仓，等12月9日美联储会议后按二次探底计划分批买')}});
+  if(acts.length){act=true;big='需要操作';ops=acts.concat(ops)}else{big='今日无需买卖';ops.unshift('维持当前示例仓位：'+wStr(ph.w))}}
+ el.className='today'+(act?' act':'');el.innerHTML='<span class="lb">'+cnDate(DATA.asof)+' 收盘后的信号</span><span class="big">'+big+'</span><div class="ops">'+ops.map(o=>'<div>'+o+'</div>').join('')+'</div><span class="ft">按预设规则自动生成，不构成投资建议。每个工作日收盘后（北京时间16:47左右）更新，刷新页面查看。</span>'}
+function renderAll(){IND={s:indicators('s'),h:indicators('h')};const a=document.getElementById('asof');if(a)a.textContent='数据截至'+cnDate(DATA.asof);renderToday();renderAlerts();renderPhase();renderNodes();renderRoute();renderRules();renderNews();renderLog();buildChart()}
 renderAll();
 (async()=>{try{const r=await fetch('data.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();const ok=b=>Array.isArray(b)&&b.length&&b.every(x=>Array.isArray(x)&&typeof x[0]==='string'&&Number.isFinite(+x[4]));
  if(j.s&&ok(j.s.bars))DATA.s.bars=j.s.bars;if(j.h&&ok(j.h.bars))DATA.h.bars=j.h.bars;if(j.macro)DATA.macro={...DATA.macro,...j.macro};if(Array.isArray(j.news)&&j.news.length)DATA.news=j.news;if(Array.isArray(j.alerts))DATA.alerts=j.alerts;if(typeof j.asof==='string')DATA.asof=j.asof;renderAll()}catch(e){}})();
